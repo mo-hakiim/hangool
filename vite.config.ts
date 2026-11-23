@@ -9,7 +9,13 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// Deployment base path. Defaults to "/" (root domain, Lovable preview).
+// For a GitHub Pages project site, build with BASE_PATH=/<repo>/ (see .github/workflows/deploy.yml).
+const rawBase = process.env.BASE_PATH?.trim() || "/";
+const base = `/${rawBase.replace(/^\/+|\/+$/g, "")}/`.replace(/^\/\/$/, "/");
+
 export default defineConfig({
+  vite: { base },
   tanstackStart: {
     pages: [
       { path: "/" },
