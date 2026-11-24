@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hangool ERP Data Model</title>
+<style>
+  :root {
+    --bg: #f6f5f1;
+    --panel: #ffffff;
+    --ink: #1f2328;
+    --muted: #5d636b;
+    --line: #dcd9d2;
+    --accent: #b4532a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); max-width: 70ch; }
+  .wrap { padding: 0 24px 32px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+  .toolbar button, .toolbar select {
+    font: inherit; font-size: 14px; padding: 6px 12px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); border-radius: 6px; cursor: pointer; }
+  .toolbar button:hover, .toolbar select:hover { border-color: #b9b5ab; }
+  .toolbar label { font-size: 14px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+  .toolbar .zoomval { min-width: 4ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+  .spacer { flex: 1; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 14px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 8px; font-size: 13px; }
+  .legend .item { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+  .legend .item:hover { text-decoration: underline; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; }
+  .legend .keys { flex-basis: 100%; color: var(--muted); border-top: 1px solid var(--line); padding-top: 6px; margin-top: 2px; }
+  .legend code { background: #f1efe9; padding: 0 4px; border-radius: 3px; }
+  #viewport { position: relative; height: 72vh; min-height: 420px; margin-top: 12px; overflow: hidden;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: grab; touch-action: none;
+    background-image: radial-gradient(#e7e4dd 1px, transparent 1px); background-size: 18px 18px; }
+  #viewport.dragging { cursor: grabbing; }
+  #stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #stage svg { display: block; max-width: none !important; height: auto; }
+  #status { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 15px; pointer-events: none; text-align: center; padding: 20px; }
+  #status.error { color: #a11; white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 13px; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .notes { margin-top: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; }
+  .notes h2 { margin: 0 0 8px; font-size: 17px; }
+  .notes h3 { margin: 14px 0 4px; font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+  .notes ul { margin: 0; padding-left: 20px; }
+  .notes li { margin: 3px 0; }
+  .notes code { background: #f1efe9; padding: 0 4px; border-radius: 3px; font-size: 13px; }
+  @media (max-width: 640px) {
+    header { padding: 16px 16px 6px; }
+    .wrap { padding: 0 16px 24px; }
+    #viewport { height: 64vh; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hangool Construction ERP: entity relationship diagram</h1>
+  <p>Every table, its main columns, primary keys (PK), foreign keys (FK) and relationships. Scroll or pinch to zoom, drag to pan, and pick a section to see only its tables and their direct neighbours.</p>
+</header>
+<div class="wrap">
+  <div class="toolbar">
+    <button id="zin" title="Zoom in">+ Zoom in</button>
+    <button id="zout" title="Zoom out">− Zoom out</button>
+    <span class="zoomval" id="zval">100%</span>
+    <button id="fit" title="Fit diagram to window">Fit</button>
+    <button id="actual" title="Show at 100%">100%</button>
+    <span class="spacer"></span>
+    <label>Section
+      <select id="focus"><option value="">All sections</option></select>
+    </label>
+    <label>Layout
+      <select id="dir"><option value="TB">Top to bottom</option><option value="LR">Left to right</option></select>
+    </label>
+    <label><input type="checkbox" id="userlinks" checked> Lines to users</label>
+  </div>
+  <div class="legend" id="legend"></div>
+  <div id="viewport"><div id="stage"></div><div id="status">Loading Mermaid…</div></div>
+  <div class="hint">Keyboard: <b>+</b>/<b>−</b> zoom, <b>0</b> fit, arrow keys pan (click the diagram first).</div>
+
+  <section class="notes">
+    <h2>Notes and assumptions</h2>
+    <h3>Rules from the brief and how the schema enforces them</h3>
+    <ul>
+      <li><b>Many roles per user:</b> <code>user_roles</code> is the join between <code>users</code> and <code>roles</code>. Only a user holding the <code>owner</code> role may insert or revoke rows (database policy). <code>assigned_by</code> records the owner. Role codes: <code>owner</code>, <code>manager</code>, <code>finance</code>, <code>accountant</code>, <code>hr</code>, <code>procurement</code>, <code>storekeeper</code>, <code>project_manager</code>, <code>site_engineer</code>, <code>site_supervisor</code>, <code>qs</code>, <code>architect</code>, <code>marketing</code>, <code>client</code>. Revoked roles get <code>revoked_at</code> and stay in the table for history.</li>
+      <li><b>Nobody approves their own request:</b> each approval step stores <code>requested_by</code> and <code>approver_id</code>, and a check requires them to differ. If the only person holding <code>required_role_id</code> is the requester, the step is saved as <code>skipped</code> and the request moves to the next <code>step_order</code>. A step left empty because nobody holds the role yet (for example project manager today) is skipped the same way, so it switches on once someone is given the role.</li>
+      <li><b>Audit log:</b> database triggers write one <code>audit_log</code> row for every insert, update, approval decision and <code>user_roles</code> change, with old and new values as JSON. <code>table_name</code> + <code>record_id</code> can point at any table, so the only line drawn is to the acting user.</li>
+      <li><b>BOQ is the budget:</b> a stage's budget is the sum of <code>quantity × unit_price</code> over that stage's approved <code>boq_items</code>. <code>stages.budget_amount</code> is a cached copy of that sum. A material request is checked line by line against its <code>boq_item_id</code> and the stage total, and the result is stored in <code>within_budget</code>.</li>
+    </ul>
+    <h3>Assumptions</h3>
+    <ul>
+      <li><b>No separate BOQ header table.</b> BOQ versions live on <code>boq_items.boq_version</code>. A BOQ approval points to the project (<code>entity_table = 'projects'</code>) and stores the version in <code>approvals.ref_version</code>. The owner's profit is stored as <code>projects.profit_pct</code>.</li>
+      <li><b>Approvals are polymorphic.</b> <code>entity_table</code> + <code>entity_id</code> point to the record being approved, so the dotted lines show which tables can be approved rather than real foreign keys. Besides the six types in the brief, I added <code>leave</code> and <code>purchase</code> because the portal summary lists leave approvals and an owner or finance sign-off on purchases.</li>
+      <li><b>Two-approval payments:</b> the threshold the owner sets is an app setting (a key–value settings table, not drawn). Payments above it get two approval steps: finance, then owner.</li>
+      <li><b>Clients log in as users.</b> A client has a <code>users</code> row with the <code>client</code> role, linked by <code>clients.user_id</code>. <code>users.totp_enabled</code> is required for staff and the owner and not used for clients.</li>
+      <li><b>One store location.</b> <code>inventory_items.qty_on_hand</code> is kept up to date from <code>stock_movements</code> and cannot go below zero. Stock in links to the purchase order and supplier; stock out links to project, stage and material request. Recording a delivery also sets the purchase order to <code>delivered</code>.</li>
+      <li><b>One attendance table</b> covers daily labourers and staff: each row has either <code>labourer_id</code> or <code>employee_id</code>. Labourers are not system users.</li>
+      <li><b>One invoice per stage milestone</b> (<code>invoices.stage_id</code> is unique). The first deposit is a <code>payments</code> row with <code>payment_type = 'deposit'</code> linked to the contract. Each payment has exactly one receipt, which cannot be edited and can only be cancelled through an approval.</li>
+      <li><b>Payment methods:</b> <code>sifalo_pay</code>, <code>zaad</code>, <code>edahab</code>, <code>evc</code>, <code>cash</code>, <code>bank</code>. Gateway payments store the Sifalo transaction id in <code>gateway_ref</code>. Staff enter cash and bank payments by hand.</li>
+      <li><b>Photos and files</b> (report photos, drawings, documents) are stored in file storage and referenced as URLs in <code>text[]</code> columns, not in a separate photos table.</li>
+      <li><b>Drawings:</b> each version is its own row, linked to the version before it by <code>previous_version_id</code>. Once approved it is locked (<code>is_final</code>, <code>locked_at</code>) and older versions are marked <code>superseded</code>.</li>
+      <li><b>"Lines to users"</b> can be switched off to declutter: most tables have an actor column (<code>recorded_by</code>, <code>created_by</code> and so on) pointing to <code>users</code>, and those lines dominate the full view. The FK columns stay in the tables either way.</li>
+      <li><b>Marketing inbox:</b> still an open question, so WhatsApp and website inquiries are only recorded as <code>leads</code>. <code>messages</code> is the client portal thread between a client and staff.</li>
+      <li>Every table also has <code>created_at</code> and <code>updated_at</code>, left off the diagram to save space. Money is <code>numeric(12,2)</code> in a single currency (USD).</li>
+    </ul>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js"></script>
+<script>
+(function () {
+  // ---- Sections and colours ------------------------------------------------
+  var SECTIONS = [
+    ["access",      "Access",        "#e8e3f7", "#6a55b5"],
+    ["sales",       "Sales",         "#fde7d4", "#c46a1f"],
+    ["projects",    "Projects",      "#d6ecfb", "#2a74b0"],
+    ["design",      "Design",        "#f9dcec", "#b0407a"],
+    ["boq",         "BOQ",           "#fff2bf", "#a8860f"],
+    ["approvals",   "Approvals",     "#ffd9d6", "#c0392b"],
+    ["procurement", "Procurement",   "#d9f2e6", "#23845a"],
+    ["inventory",   "Inventory",     "#e2f0c9", "#5b8a1c"],
+    ["site",        "Site",          "#f3e2cf", "#8a5a2b"],
+    ["finance",     "Finance",       "#cff1f1", "#1d8585"],
+    ["hr",          "HR",            "#e6e6e6", "#5a5f66"],
+    ["client",      "Client portal", "#dfe6ff", "#3c55c7"],
+    ["marketing",   "Marketing",     "#ffe0f7", "#a33d8f"]
+  ];
+
+  // ---- Tables: [name, section, attribute lines in Mermaid syntax] ---------
+  var T = [
+    // Access
+    ["users", "access", [
+      'uuid id PK', 'text full_name', 'text email UK', 'text phone', 'text password_hash',
+      'bool totp_enabled "Google Authenticator 2FA, staff only"', 'bool is_active', 'timestamp last_login_at']],
+    ["roles", "access", [
+      'uuid id PK', 'text code UK "owner, finance, qs, architect, client, ... (see notes)"',
+      'text name', 'jsonb permissions']],
+    ["user_roles", "access", [
+      'uuid id PK', 'uuid user_id FK', 'uuid role_id FK', 'uuid assigned_by FK "owner only"',
+      'timestamp assigned_at', 'timestamp revoked_at']],
+    ["audit_log", "access", [
+      'bigint id PK', 'uuid actor_id FK', 'enum action "create, update, delete, approve, reject, role_change"',
+      'text table_name', 'uuid record_id', 'jsonb old_values', 'jsonb new_values', 'timestamp created_at']],
+
+    // Sales
+    ["leads", "sales", [
+      'uuid id PK', 'text name', 'text phone', 'enum source "whatsapp, website, walk_in, referral"',
+      'enum status "new, contacted, visiting, signed, lost"', 'uuid assigned_to FK', 'uuid campaign_id FK',
+      'uuid property_id FK', 'timestamp created_at']],
+    ["clients", "sales", [
+      'uuid id PK', 'uuid user_id FK "portal login"', 'uuid lead_id FK', 'text name', 'text phone', 'text email', 'text address']],
+    ["contracts", "sales", [
+      'uuid id PK', 'uuid client_id FK', 'uuid project_id FK', 'text contract_no UK', 'numeric contract_value',
+      'date signed_at', 'text file_url', 'enum status "draft, signed, completed, cancelled"']],
+
+    // Projects
+    ["projects", "projects", [
+      'uuid id PK', 'uuid client_id FK', 'uuid manager_id FK', 'text code UK', 'text name', 'text location',
+      'numeric profit_pct "owner markup on BOQ"', 'enum status "design, boq, active, handed_over, on_hold"',
+      'date start_date', 'date end_date']],
+    ["stages", "projects", [
+      'uuid id PK', 'uuid project_id FK', 'enum name "foundation, columns, walls, roof, finishing"', 'int seq',
+      'date planned_start', 'date planned_end', 'date completed_at', 'numeric budget_amount "sum of approved BOQ"',
+      'numeric milestone_amount', 'enum status "pending, in_progress, done, verified"']],
+    ["project_members", "projects", [
+      'uuid id PK', 'uuid project_id FK', 'uuid user_id FK', 'uuid role_id FK', 'date assigned_at']],
+
+    // Design
+    ["drawings", "design", [
+      'uuid id PK', 'uuid project_id FK', 'uuid previous_version_id FK "self"', 'uuid uploaded_by FK', 'text title',
+      'int version_no', 'text file_url', 'enum status "draft, submitted, approved, superseded"', 'bool is_final',
+      'timestamp locked_at']],
+    ["change_requests", "design", [
+      'uuid id PK', 'uuid project_id FK', 'uuid drawing_id FK', 'uuid requested_by FK "client or architect"',
+      'text description', 'numeric cost_impact', 'enum status "open, priced, approved, rejected, applied"']],
+
+    // BOQ
+    ["boq_items", "boq", [
+      'uuid id PK', 'uuid project_id FK', 'uuid stage_id FK', 'uuid inventory_item_id FK "material, nullable for labour/jobs"',
+      'uuid change_request_id FK', 'uuid prepared_by FK "quantity surveyor"', 'text description', 'text unit',
+      'numeric quantity', 'numeric unit_price', 'numeric amount "quantity x unit_price"', 'int boq_version',
+      'enum status "draft, approved, superseded"']],
+
+    // Approvals
+    ["approvals", "approvals", [
+      'uuid id PK', 'enum approval_type "material_request, design, boq, stage_completion, change_request, payment, purchase, leave"',
+      'text entity_table', 'uuid entity_id', 'int ref_version "BOQ or drawing version"', 'int step_order',
+      'uuid required_role_id FK', 'uuid requested_by FK', 'uuid approver_id FK "must differ from requested_by"',
+      'enum status "pending, approved, rejected, skipped"', 'numeric amount', 'text comment', 'timestamp decided_at']],
+
+    // Procurement
+    ["suppliers", "procurement", [
+      'uuid id PK', 'text name', 'text phone', 'text address', 'text payment_terms', 'bool is_active']],
+    ["material_requests", "procurement", [
+      'uuid id PK', 'uuid project_id FK', 'uuid stage_id FK', 'uuid requested_by FK "site engineer"',
+      'bool within_budget', 'date needed_by',
+      'enum status "submitted, pm_approved, sourcing, ordered, delivered, issued, rejected"']],
+    ["request_items", "procurement", [
+      'uuid id PK', 'uuid request_id FK', 'uuid inventory_item_id FK', 'uuid boq_item_id FK', 'numeric quantity',
+      'numeric qty_from_stock', 'numeric qty_to_buy']],
+    ["quotes", "procurement", [
+      'uuid id PK', 'uuid request_id FK', 'uuid supplier_id FK', 'numeric total_amount', 'date valid_until',
+      'bool is_selected', 'text file_url']],
+    ["purchase_orders", "procurement", [
+      'uuid id PK', 'uuid request_id FK', 'uuid quote_id FK', 'uuid supplier_id FK', 'uuid created_by FK', 'text po_number UK',
+      'numeric total_amount', 'enum status "waiting, approved, ordered, delivered, cancelled"']],
+
+    // Inventory
+    ["inventory_items", "inventory", [
+      'uuid id PK', 'text sku UK', 'text name', 'text unit', 'text location', 'numeric qty_on_hand "never below 0"',
+      'numeric reorder_level']],
+    ["stock_movements", "inventory", [
+      'uuid id PK', 'uuid item_id FK', 'enum direction "in, out, adjust"', 'numeric quantity',
+      'uuid purchase_order_id FK "in"', 'uuid supplier_id FK "in"', 'uuid project_id FK "out"', 'uuid stage_id FK "out"',
+      'uuid request_id FK "out"', 'uuid recorded_by FK', 'enum condition "ok, damaged, missing"', 'timestamp moved_at']],
+
+    // Site
+    ["daily_reports", "site", [
+      'uuid id PK', 'uuid project_id FK', 'uuid stage_id FK', 'uuid author_id FK "engineer"', 'uuid reviewed_by FK "owner"',
+      'date report_date', 'text progress', 'text problems', 'int workers_present', 'text[] photo_urls',
+      'timestamp reviewed_at', 'bool visible_to_client']],
+    ["labourers", "site", [
+      'uuid id PK', 'text name', 'text phone', 'text trade', 'numeric daily_rate', 'bool is_active']],
+    ["site_attendance", "site", [
+      'uuid id PK', 'uuid project_id FK', 'uuid labourer_id FK "or employee_id"', 'uuid employee_id FK',
+      'uuid recorded_by FK', 'date work_date', 'bool present', 'numeric hours']],
+    ["labour_payments", "site", [
+      'uuid id PK', 'uuid labourer_id FK', 'uuid project_id FK', 'uuid paid_by FK', 'date period_start', 'date period_end',
+      'int days_worked', 'numeric amount', 'enum method "cash, zaad, edahab, evc, bank"']],
+
+    // Finance
+    ["invoices", "finance", [
+      'uuid id PK', 'uuid project_id FK', 'uuid stage_id FK, UK "one per milestone"', 'uuid client_id FK', 'text invoice_no UK',
+      'numeric amount', 'date due_date', 'enum status "draft, issued, part_paid, paid, cancelled"']],
+    ["payments", "finance", [
+      'uuid id PK', 'uuid client_id FK', 'uuid project_id FK', 'uuid invoice_id FK "null for deposit"', 'uuid contract_id FK',
+      'uuid recorded_by FK', 'enum payment_type "deposit, milestone, other"', 'numeric amount',
+      'enum method "sifalo_pay, zaad, edahab, evc, cash, bank"', 'text gateway_ref', 'timestamp paid_at',
+      'enum status "pending, confirmed, cancelled"']],
+    ["receipts", "finance", [
+      'uuid id PK', 'uuid payment_id FK, UK', 'text receipt_no UK', 'uuid issued_by FK', 'timestamp issued_at',
+      'text pdf_url', 'bool cancelled "only via approval"']],
+    ["supplier_payments", "finance", [
+      'uuid id PK', 'uuid supplier_id FK', 'uuid purchase_order_id FK', 'uuid recorded_by FK', 'numeric amount',
+      'enum method "sifalo_pay, zaad, edahab, evc, cash, bank"', 'timestamp paid_at',
+      'enum status "pending, approved, paid"']],
+
+    // HR
+    ["employees", "hr", [
+      'uuid id PK', 'uuid user_id FK, UK', 'text job_title', 'text department', 'date hire_date', 'numeric base_salary',
+      'enum status "active, on_leave, left"']],
+    ["leave_requests", "hr", [
+      'uuid id PK', 'uuid employee_id FK', 'enum leave_type "annual, sick, unpaid, other"', 'date start_date', 'date end_date',
+      'text reason', 'enum status "pending, approved, rejected"']],
+    ["payroll", "hr", [
+      'uuid id PK', 'uuid employee_id FK', 'date period_month', 'numeric gross', 'numeric deductions', 'numeric net',
+      'enum status "draft, approved, paid"', 'timestamp paid_at']],
+    ["employee_documents", "hr", [
+      'uuid id PK', 'uuid employee_id FK', 'enum doc_type "contract, national_id, permit, certificate"', 'text file_url',
+      'date expiry_date', 'text visibility']],
+
+    // Client portal
+    ["messages", "client", [
+      'uuid id PK', 'uuid client_id FK', 'uuid project_id FK', 'uuid sender_id FK', 'text body', 'text attachment_url',
+      'timestamp sent_at', 'timestamp read_at']],
+    ["complaints", "client", [
+      'uuid id PK', 'uuid client_id FK', 'uuid project_id FK', 'uuid assigned_to FK', 'text subject', 'text description',
+      'enum status "open, in_progress, resolved, closed"', 'timestamp resolved_at']],
+    ["warranty_claims", "client", [
+      'uuid id PK', 'uuid client_id FK', 'uuid project_id FK', 'uuid assigned_to FK', 'text description', 'text[] photo_urls',
+      'enum status "open, inspected, fixed, rejected"', 'timestamp reported_at', 'timestamp resolved_at']],
+
+    // Marketing
+    ["properties", "marketing", [
+      'uuid id PK', 'uuid project_id FK "if built by Hangool"', 'text title', 'text location', 'numeric price',
+      'text[] photo_urls', 'enum status "available, reserved, sold"']],
+    ["campaigns", "marketing", [
+      'uuid id PK', 'uuid created_by FK', 'text name', 'enum media_type "poster, video, ad"', 'text channel',
+      'numeric budget', 'date start_date', 'date end_date']],
+    ["follow_ups", "marketing", [
+      'uuid id PK', 'uuid lead_id FK', 'uuid assigned_to FK', 'timestamp due_at', 'text note', 'bool done']]
+  ];
+
+  // ---- Relationships: [parent, cardinality, child, label] -----------------
+  // Solid lines (--) are real foreign keys; dotted lines (..) are polymorphic links.
+  var R = [
+    // Access
+    ["roles", "||--o{", "user_roles", "granted via"],
+    ["users", "||--o{", "user_roles", "holds"],
+    ["users", "||--o{", "user_roles", "assigns (owner)"],
+    ["users", "||--o{", "audit_log", "performs"],
+    // Sales
+    ["users", "|o--o{", "leads", "handles"],
+    ["campaigns", "|o--o{", "leads", "generates"],
+    ["properties", "|o--o{", "leads", "enquired about"],
+    ["leads", "|o--o|", "clients", "converts to"],
+    ["users", "|o--o|", "clients", "portal login"],
+    ["clients", "||--o{", "contracts", "signs"],
+    ["projects", "||--o{", "contracts", "governed by"],
+    // Projects
+    ["clients", "||--o{", "projects", "owns"],
+    ["users", "|o--o{", "projects", "manages"],
+    ["projects", "||--|{", "stages", "split into"],
+    ["projects", "||--o{", "project_members", "staffed by"],
+    ["users", "||--o{", "project_members", "assigned"],
+    ["roles", "||--o{", "project_members", "acts as"],
+    // Design
+    ["projects", "||--o{", "drawings", "has"],
+    ["drawings", "|o--o|", "drawings", "previous version"],
+    ["users", "||--o{", "drawings", "uploads"],
+    ["projects", "||--o{", "change_requests", "has"],
+    ["drawings", "|o--o{", "change_requests", "changes"],
+    ["users", "||--o{", "change_requests", "raises"],
+    // BOQ
+    ["projects", "||--o{", "boq_items", "priced in"],
+    ["stages", "||--o{", "boq_items", "budget for"],
+    ["inventory_items", "|o--o{", "boq_items", "material"],
+    ["change_requests", "|o--o{", "boq_items", "re-prices"],
+    ["users", "||--o{", "boq_items", "prepares"],
+    // Approvals
+    ["roles", "||--o{", "approvals", "required role"],
+    ["users", "||--o{", "approvals", "requests"],
+    ["users", "|o--o{", "approvals", "decides"],
+    ["material_requests", "||..o{", "approvals", "approved by"],
+    ["purchase_orders", "||..o{", "approvals", "approved by"],
+    ["drawings", "||..o{", "approvals", "approved by"],
+    ["projects", "||..o{", "approvals", "BOQ approved by"],
+    ["stages", "||..o{", "approvals", "completion approved by"],
+    ["change_requests", "||..o{", "approvals", "approved by"],
+    ["payments", "||..o{", "approvals", "approved by"],
+    ["supplier_payments", "||..o{", "approvals", "approved by"],
+    ["leave_requests", "||..o{", "approvals", "approved by"],
+    // Procurement
+    ["projects", "||--o{", "material_requests", "needs"],
+    ["stages", "||--o{", "material_requests", "for stage"],
+    ["users", "||--o{", "material_requests", "requests"],
+    ["material_requests", "||--|{", "request_items", "contains"],
+    ["inventory_items", "||--o{", "request_items", "item"],
+    ["boq_items", "|o--o{", "request_items", "checked against"],
+    ["material_requests", "||--o{", "quotes", "priced by"],
+    ["suppliers", "||--o{", "quotes", "submits"],
+    ["material_requests", "||--o{", "purchase_orders", "fulfilled by"],
+    ["quotes", "|o--o|", "purchase_orders", "accepted as"],
+    ["suppliers", "||--o{", "purchase_orders", "supplies"],
+    ["users", "||--o{", "purchase_orders", "raises"],
+    // Inventory
+    ["inventory_items", "||--o{", "stock_movements", "moves"],
+    ["purchase_orders", "|o--o{", "stock_movements", "delivered in"],
+    ["suppliers", "|o--o{", "stock_movements", "delivers"],
+    ["projects", "|o--o{", "stock_movements", "issued to"],
+    ["stages", "|o--o{", "stock_movements", "issued for"],
+    ["material_requests", "|o--o{", "stock_movements", "fulfils"],
+    ["users", "||--o{", "stock_movements", "records"],
+    // Site
+    ["projects", "||--o{", "daily_reports", "reported in"],
+    ["stages", "||--o{", "daily_reports", "covers"],
+    ["users", "||--o{", "daily_reports", "writes"],
+    ["users", "|o--o{", "daily_reports", "reviews"],
+    ["projects", "||--o{", "site_attendance", "on site"],
+    ["labourers", "|o--o{", "site_attendance", "attends"],
+    ["employees", "|o--o{", "site_attendance", "attends"],
+    ["users", "||--o{", "site_attendance", "records"],
+    ["labourers", "||--o{", "labour_payments", "paid"],
+    ["projects", "||--o{", "labour_payments", "charged to"],
+    ["users", "||--o{", "labour_payments", "pays"],
+    // Finance
+    ["stages", "||--o|", "invoices", "milestone"],
+    ["projects", "||--o{", "invoices", "billed"],
+    ["clients", "||--o{", "invoices", "owes"],
+    ["clients", "||--o{", "payments", "makes"],
+    ["projects", "||--o{", "payments", "receives"],
+    ["invoices", "|o--o{", "payments", "settled by"],
+    ["contracts", "|o--o{", "payments", "deposit for"],
+    ["users", "||--o{", "payments", "records"],
+    ["payments", "||--||", "receipts", "proved by"],
+    ["users", "||--o{", "receipts", "issues"],
+    ["suppliers", "||--o{", "supplier_payments", "paid"],
+    ["purchase_orders", "|o--o{", "supplier_payments", "settles"],
+    ["users", "||--o{", "supplier_payments", "records"],
+    // HR
+    ["users", "||--o|", "employees", "is"],
+    ["employees", "||--o{", "leave_requests", "asks"],
+    ["employees", "||--o{", "payroll", "paid"],
+    ["employees", "||--o{", "employee_documents", "files"],
+    // Client portal
+    ["clients", "||--o{", "messages", "thread"],
+    ["projects", "|o--o{", "messages", "about"],
+    ["users", "||--o{", "messages", "sends"],
+    ["clients", "||--o{", "complaints", "raises"],
+    ["projects", "|o--o{", "complaints", "about"],
+    ["users", "|o--o{", "complaints", "handles"],
+    ["clients", "||--o{", "warranty_claims", "claims"],
+    ["projects", "||--o{", "warranty_claims", "covers"],
+    ["users", "|o--o{", "warranty_claims", "handles"],
+    // Marketing
+    ["projects", "|o--o{", "properties", "listed as"],
+    ["users", "||--o{", "campaigns", "runs"],
+    ["leads", "||--o{", "follow_ups", "has"],
+    ["users", "||--o{", "follow_ups", "assigned"]
+  ];
+
+  var sectionOf = {};
+  T.forEach(function (t) { sectionOf[t[0]] = t[1]; });
+  // Sanity check: every relationship end must be a known table.
+  R.forEach(function (r) {
+    if (!sectionOf[r[0]] || !sectionOf[r[2]]) console.error("Unknown table in relationship", r);
+  });
+
+  // ---- Build Mermaid source -------------------------------------------------
+  function buildSource(focus, showUserLinks, dir) {
+    var rels = R.filter(function (r) {
+      if (!showUserLinks && (r[0] === "users") && r[2] !== "user_roles" && r[2] !== "audit_log" &&
+          !(focus === "access")) return false;
+      if (!focus) return true;
+      return sectionOf[r[0]] === focus || sectionOf[r[2]] === focus;
+    });
+    var include = {};
+    T.forEach(function (t) { if (!focus || t[1] === focus) include[t[0]] = true; });
+    rels.forEach(function (r) { include[r[0]] = true; include[r[2]] = true; });
+
+    var out = ["erDiagram", "  direction " + (dir || "TB")];
+    SECTIONS.forEach(function (s) {
+      out.push("  classDef " + s[0] + " fill:" + s[2] + ",stroke:" + s[3] + ",stroke-width:2px");
+    });
+    T.forEach(function (t) {
+      if (!include[t[0]]) return;
+      out.push("  " + t[0] + ":::" + t[1] + " {");
+      t[2].forEach(function (a) { out.push("    " + a); });
+      out.push("  }");
+    });
+    rels.forEach(function (r) {
+      out.push("  " + r[0] + " " + r[1] + " " + r[2] + ' : "' + r[3] + '"');
+    });
+    return out.join("\n");
+  }
+
+  // ---- Legend & section picker ---------------------------------------------
+  var legend = document.getElementById("legend");
+  var focusSel = document.getElementById("focus");
+  SECTIONS.forEach(function (s) {
+    var count = T.filter(function (t) { return t[1] === s[0]; }).length;
+    var el = document.createElement("span");
+    el.className = "item";
+    el.title = "Show only " + s[1];
+    el.innerHTML = '<span class="sw" style="background:' + s[2] + ';border-color:' + s[3] + '"></span>' +
+      s[1] + ' <span style="color:var(--muted)">(' + count + ')</span>';
+    el.addEventListener("click", function () { focusSel.value = s[0]; render(); });
+    legend.appendChild(el);
+    var o = document.createElement("option");
+    o.value = s[0]; o.textContent = s[1];
+    focusSel.appendChild(o);
+  });
+  var keys = document.createElement("div");
+  keys.className = "keys";
+  keys.innerHTML = '<b>PK</b> primary key · <b>FK</b> foreign key · <b>UK</b> unique · ' +
+    'solid line = foreign key · dotted line = polymorphic link (<code>approvals.entity_table</code> + <code>entity_id</code>) · ' +
+    'crow’s foot = many, bar = one, circle = optional · ' + T.length + ' tables, ' + R.length + ' relationships';
+  legend.appendChild(keys);
+
+  // ---- Pan & zoom -----------------------------------------------------------
+  var viewport = document.getElementById("viewport");
+  var stage = document.getElementById("stage");
+  var statusEl = document.getElementById("status");
+  var zval = document.getElementById("zval");
+  var view = { x: 0, y: 0, k: 1 };
+  var MIN = 0.05, MAX = 4;
+  viewport.tabIndex = 0;
+
+  function apply() {
+    stage.style.transform = "translate(" + view.x + "px," + view.y + "px) scale(" + view.k + ")";
+    zval.textContent = Math.round(view.k * 100) + "%";
+  }
+  function zoomAt(factor, cx, cy) {
+    var k = Math.min(MAX, Math.max(MIN, view.k * factor));
+    factor = k / view.k;
+    view.x = cx - (cx - view.x) * factor;
+    view.y = cy - (cy - view.y) * factor;
+    view.k = k;
+    apply();
+  }
+  function center() { return { x: viewport.clientWidth / 2, y: viewport.clientHeight / 2 }; }
+  function size() {
+    var svg = stage.querySelector("svg");
+    if (!svg) return null;
+    return { w: svg.getBoundingClientRect().width / view.k, h: svg.getBoundingClientRect().height / view.k };
+  }
+  function fit() {
+    var s = size(); if (!s) return;
+    var pad = 24;
+    var k = Math.min((viewport.clientWidth - pad * 2) / s.w, (viewport.clientHeight - pad * 2) / s.h, 1);
+    view.k = Math.max(MIN, k);
+    view.x = (viewport.clientWidth - s.w * view.k) / 2;
+    view.y = (viewport.clientHeight - s.h * view.k) / 2;
+    apply();
+  }
+  function actual() {
+    var c = center(); zoomAt(1 / view.k, c.x, c.y);
+  }
+
+  viewport.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    var r = viewport.getBoundingClientRect();
+    var d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    zoomAt(Math.exp(-d * 0.0015), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  var pointers = new Map(), last = null, pinch = null;
+  viewport.addEventListener("pointerdown", function (e) {
+    viewport.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    viewport.classList.add("dragging");
+    if (pointers.size === 1) last = { x: e.clientX, y: e.clientY };
+    if (pointers.size === 2) {
+      var p = Array.from(pointers.values());
+      pinch = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) };
+    }
+  });
+  viewport.addEventListener("pointermove", function (e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2 && pinch) {
+      var p = Array.from(pointers.values());
+      var d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      var r = viewport.getBoundingClientRect();
+      zoomAt(d / pinch.d, (p[0].x + p[1].x) / 2 - r.left, (p[0].y + p[1].y) / 2 - r.top);
+      pinch.d = d;
+    } else if (pointers.size === 1 && last) {
+      view.x += e.clientX - last.x; view.y += e.clientY - last.y;
+      last = { x: e.clientX, y: e.clientY };
+      apply();
+    }
+  });
+  function endPointer(e) {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (pointers.size === 1) { var p = Array.from(pointers.values())[0]; last = { x: p.x, y: p.y }; }
+    if (pointers.size === 0) { last = null; viewport.classList.remove("dragging"); }
+  }
+  viewport.addEventListener("pointerup", endPointer);
+  viewport.addEventListener("pointercancel", endPointer);
+  viewport.addEventListener("dblclick", function (e) {
+    var r = viewport.getBoundingClientRect();
+    zoomAt(e.shiftKey ? 0.5 : 2, e.clientX - r.left, e.clientY - r.top);
+  });
+  viewport.addEventListener("keydown", function (e) {
+    var c = center(), step = 60;
+    if (e.key === "+" || e.key === "=") zoomAt(1.25, c.x, c.y);
+    else if (e.key === "-" || e.key === "_") zoomAt(0.8, c.x, c.y);
+    else if (e.key === "0") fit();
+    else if (e.key === "ArrowLeft") { view.x += step; apply(); }
+    else if (e.key === "ArrowRight") { view.x -= step; apply(); }
+    else if (e.key === "ArrowUp") { view.y += step; apply(); }
+    else if (e.key === "ArrowDown") { view.y -= step; apply(); }
+    else return;
+    e.preventDefault();
+  });
+  document.getElementById("zin").onclick = function () { var c = center(); zoomAt(1.25, c.x, c.y); };
+  document.getElementById("zout").onclick = function () { var c = center(); zoomAt(0.8, c.x, c.y); };
+  document.getElementById("fit").onclick = fit;
+  document.getElementById("actual").onclick = actual;
+
+  // ---- Render ---------------------------------------------------------------
+  if (!window.mermaid) {
+    statusEl.className = "error";
+    statusEl.textContent = "Mermaid could not be loaded from the CDN (cdn.jsdelivr.net).\nCheck your internet connection and reload the page.";
+    window.__erdStatus = "no-mermaid";
+    return;
+  }
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: "base",
+    securityLevel: "strict",
+    maxTextSize: 200000,
+    maxEdges: 2000,
+    themeVariables: {
+      fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+      fontSize: "14px",
+      primaryColor: "#ffffff",
+      primaryBorderColor: "#7a7f87",
+      lineColor: "#6b7078",
+      attributeBackgroundColorOdd: "#ffffff",
+      attributeBackgroundColorEven: "#f7f6f2"
+    },
+    er: { useMaxWidth: false, diagramPadding: 30, entityPadding: 12, minEntityWidth: 120 }
+  });
+
+  var renderId = 0;
+  async function render() {
+    var id = ++renderId;
+    var focus = focusSel.value;
+    var src = buildSource(focus, document.getElementById("userlinks").checked, document.getElementById("dir").value);
+    statusEl.className = ""; statusEl.textContent = "Drawing diagram…";
+    stage.innerHTML = "";
+    try {
+      await mermaid.parse(src);
+      var res = await mermaid.render("erd" + id, src);
+      if (id !== renderId) return;
+      stage.innerHTML = res.svg;
+      statusEl.textContent = "";
+      fit();
+      window.__erdStatus = "ok";
+    } catch (err) {
+      if (id !== renderId) return;
+      statusEl.className = "error";
+      statusEl.textContent = "Mermaid error:\n" + (err && err.message ? err.message : String(err));
+      window.__erdStatus = "error: " + (err && err.message ? err.message : String(err));
+      console.error(err);
+    }
+  }
+  focusSel.addEventListener("change", render);
+  document.getElementById("dir").addEventListener("change", render);
+  document.getElementById("userlinks").addEventListener("change", render);
+  render();
+})();
+</script>
+</body>
+</html>
