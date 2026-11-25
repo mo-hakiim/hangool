@@ -397,17 +397,6 @@ html {
   z-index: 45;
   box-shadow: 0 5px 20px color-mix(in oklch, var(--deep-green) 25%, transparent);
 }
-.map-placeholder {
-  min-height: 240px;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  background-color: var(--muted);
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 45px 45px;
-}
 @media (max-width: 900px) {
   .site-container {
     width: calc(100% - 40px);

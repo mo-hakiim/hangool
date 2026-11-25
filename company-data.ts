@@ -5,11 +5,15 @@ import construction from "./src/assets/construction.webp";
 export const company = {
   name: "Hangool Construction & Real Estate",
   location: "Hargeisa, Somaliland",
-  phone: "[PHONE NUMBER]",
-  whatsapp: "[WHATSAPP NUMBER]",
-  email: "[EMAIL ADDRESS]",
-  address: "[OFFICE ADDRESS], Hargeisa, Somaliland",
-  hours: "[WORKING HOURS]",
+  // All contact details live here; every page reads them from this object.
+  phone: "+252 63 6378888",
+  phoneHref: "tel:+252636378888",
+  whatsapp: "+252 63 6378888",
+  whatsappUrl: "https://wa.me/252636378888",
+  email: "info@hangooldevelopment.com",
+  emailHref: "mailto:info@hangooldevelopment.com",
+  footerDescription:
+    "Hangool Development builds homes, commercial buildings and real estate across Somaliland — from design and planning to construction and handover, delivered with quality, transparency and on time.",
   story:
     "Hangool Construction & Real Estate builds thoughtfully designed homes and commercial developments rooted in Somali heritage and modern craftsmanship. Dedicated to families and businesses building their future, we blend cultural authenticity with enduring structural quality to create spaces that thrive for generations.",
   mission:
@@ -24,10 +28,10 @@ export const company = {
   ],
   values: ["Ambition", "Purpose", "Integrity", "Craftsmanship", "Pride in Somali heritage"],
   socials: [
-    { name: "Facebook", url: "[FACEBOOK URL]" },
-    { name: "Instagram", url: "[INSTAGRAM URL]" },
-    { name: "TikTok", url: "[TIKTOK URL]" },
-    { name: "YouTube", url: "[YOUTUBE URL]" },
+    { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61596598676776" },
+    { name: "TikTok", url: "https://www.tiktok.com/@hangooldevelopment" },
+    { name: "Instagram", url: "https://www.instagram.com/hangooldevelopment/" },
+    { name: "YouTube", url: "https://www.youtube.com/@HANGOOLDevelopment" },
   ],
   team: [
     { name: "[TEAM MEMBER NAME]", role: "Managing Director" },

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { MessageCircle, ArrowUpRight, Phone, Mail, MapPin, Clock3 } from "lucide-react";
+import { MessageCircle, ArrowUpRight, Phone, Mail } from "lucide-react";
 import { company, services } from "../../company-data";
-import { PageHeading } from "@/components/site";
+import { PageHeading, SocialLinks } from "@/components/site";
 import { Button } from "@/components/ui/button";
 import { buildWhatsAppLink } from "@/lib/contact";
 import { pageHead } from "@/lib/seo";
@@ -31,20 +31,6 @@ function Contact() {
     }
     window.open(link, "_blank", "noopener,noreferrer");
     setNotice("Your inquiry is ready in WhatsApp. Send it there to start the conversation.");
-  }
-  function direct(channel: "phone" | "email" | "whatsapp") {
-    const value = company[channel];
-    if (value.includes("[")) {
-      setNotice(
-        `Our ${channel === "phone" ? "phone number" : channel === "email" ? "email address" : "WhatsApp number"} is coming soon.`,
-      );
-      return;
-    }
-    const link =
-      channel === "whatsapp"
-        ? buildWhatsAppLink(value)
-        : `${channel === "phone" ? "tel" : "mailto"}:${value}`;
-    if (link) window.location.href = link;
   }
   return (
     <>
@@ -116,47 +102,66 @@ function Contact() {
             <h2 className="text-2xl font-bold mb-7">A conversation. A beginning.</h2>
             <div className="space-y-6">
               {[
-                { icon: MapPin, title: "Visit our office", value: company.address },
-                { icon: Phone, title: "Call us", value: company.phone },
-                { icon: Mail, title: "Email us", value: company.email },
-                { icon: Clock3, title: "Office hours", value: company.hours },
+                {
+                  icon: Phone,
+                  title: "Call us",
+                  value: company.phone,
+                  href: company.phoneHref,
+                  external: false,
+                },
+                {
+                  icon: MessageCircle,
+                  title: "WhatsApp",
+                  value: company.whatsapp,
+                  href: company.whatsappUrl,
+                  external: true,
+                },
+                {
+                  icon: Mail,
+                  title: "Email us",
+                  value: company.email,
+                  href: company.emailHref,
+                  external: false,
+                },
               ].map((d) => (
                 <div key={d.title} className="flex gap-4">
                   <d.icon className="size-5 text-primary mt-1" />
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-sm font-bold">{d.title}</h3>
-                    <p className="section-copy mt-2">{d.value}</p>
+                    <a
+                      href={d.href}
+                      className="section-copy mt-2 block break-all hover:text-primary"
+                      {...(d.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    >
+                      {d.value}
+                    </a>
                   </div>
                 </div>
               ))}
             </div>
             <div className="flex flex-wrap gap-3 mt-7">
-              <Button variant="outline" onClick={() => direct("phone")}>
-                <Phone />
-                Call
-              </Button>
-              <Button onClick={() => direct("whatsapp")}>
-                <MessageCircle />
-                WhatsApp
-              </Button>
-              <Button variant="outline" onClick={() => direct("email")}>
-                <Mail />
-                Email
-              </Button>
-            </div>
-            <div className="map-placeholder mt-9 rounded-sm">
-              <MapPin className="size-8 text-primary mx-auto mb-3" />
-              <h3 className="text-sm font-bold">Hargeisa, Somaliland</h3>
-              <p className="text-xs text-muted-foreground mt-2">Office map coming soon</p>
-              <Button variant="link" asChild className="mt-3">
-                <a
-                  href="https://www.google.com/maps/search/Hargeisa+Somaliland"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Explore Hargeisa <ArrowUpRight />
+              <Button variant="outline" asChild>
+                <a href={company.phoneHref}>
+                  <Phone />
+                  Call
                 </a>
               </Button>
+              <Button asChild>
+                <a href={company.whatsappUrl} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle />
+                  WhatsApp
+                </a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href={company.emailHref}>
+                  <Mail />
+                  Email
+                </a>
+              </Button>
+            </div>
+            <div className="mt-9">
+              <h3 className="text-sm font-bold mb-4">Follow us</h3>
+              <SocialLinks variant="outline" />
             </div>
           </aside>
         </div>
