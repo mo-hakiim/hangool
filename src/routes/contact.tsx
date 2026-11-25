@@ -57,7 +57,7 @@ function Contact() {
               kind="contact"
               submitLabel={t.form.send}
               successText={t.contact.success}
-              whatsappIntro="Hello Hangool,"
+              whatsappIntro={t.form.waContact}
             />
           </div>
           <aside className="min-w-0">

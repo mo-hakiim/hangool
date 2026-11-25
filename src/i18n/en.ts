@@ -511,6 +511,8 @@ const dict = {
     invalidEmail: "Please enter a valid email address.",
     error: "Your message could not be sent. Please try again, or contact us on WhatsApp.",
     tooFast: "Please take a moment to check your details, then send again.",
+    waContact: "Hello Hangool,",
+    waQuote: "Hello Hangool, I would like a quote.",
   },
   seo: {
     home: {

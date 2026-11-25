@@ -27,12 +27,15 @@ function NotFoundComponent() {
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
+        <p className="mt-3 text-sm text-muted-foreground" lang="so">
+          Bogga aad raadinayso ma jiro ama meel kale ayaa loo raray.
+        </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            Go home · Bogga hore
           </Link>
         </div>
       </div>
@@ -56,6 +59,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+        <p className="mt-3 text-sm text-muted-foreground" lang="so">
+          Cillad ayaa dhinacayaga ka dhacday. Isku day inaad bogga dib u furto ama ku noqo bogga
+          hore.
+        </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -64,13 +71,13 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            Try again · Isku day mar kale
           </button>
           <a
             href={import.meta.env.BASE_URL}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            Go home · Bogga hore
           </a>
         </div>
       </div>

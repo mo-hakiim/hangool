@@ -220,6 +220,7 @@ html {
   font-weight: 700;
   position: relative;
   padding-block: 14px;
+  white-space: nowrap;
 }
 .nav-link[data-active="true"] {
   color: var(--primary);

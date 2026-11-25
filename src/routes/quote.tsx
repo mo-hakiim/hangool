@@ -78,7 +78,7 @@ function Quote() {
               kind="quote"
               submitLabel={t.form.sendQuote}
               successText={t.quote.success}
-              whatsappIntro="Hello Hangool, I would like a quote."
+              whatsappIntro={t.form.waQuote}
             >
               <QuoteFields />
             </InquiryForm>

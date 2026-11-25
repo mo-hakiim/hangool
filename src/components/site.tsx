@@ -193,7 +193,7 @@ export function SiteHeader() {
         <Link to="/" aria-label={t.nav.home_aria} onClick={() => setOpen(false)}>
           <img src={logo} alt="Hangool Construction & Real Estate" className="brand-image" />
         </Link>
-        <nav aria-label={t.nav.mainNav} className="hidden xl:flex items-center gap-6">
+        <nav aria-label={t.nav.mainNav} className="hidden xl:flex items-center gap-5 2xl:gap-6">
           {navGroups.map((g) =>
             g.children ? (
               <DesktopGroup key={g.label} group={g} transparent={transparent} />

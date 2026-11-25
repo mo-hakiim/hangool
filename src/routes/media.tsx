@@ -23,7 +23,7 @@ function MediaRedirect() {
     <section className="section">
       <div className="site-container">
         <Link to="/gallery" className="text-primary font-semibold">
-          Gallery →
+          Gallery · Sawirro →
         </Link>
       </div>
     </section>
