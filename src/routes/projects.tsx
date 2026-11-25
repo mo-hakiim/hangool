@@ -1,111 +1,138 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { MapPin, Calendar, X } from "lucide-react";
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { projects, type Project } from "../../company-data";
-import { CTA, PageHeading, ProjectCard } from "@/components/site";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { images } from "../../company-data";
+import { CTA, EmptyState, LoadingGrid, MediaCard, PageHeading } from "@/components/site";
 import { Button } from "@/components/ui/button";
-import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { pageHead } from "@/lib/seo";
+import { pageHead, usePageMeta } from "@/lib/seo";
+import { useI18n, useLocalize } from "@/i18n";
+import { useProjects, type ProjectCategory, type ProjectStatus } from "@/data/live";
+import { storageUrl } from "@/lib/supabase";
+
+const STATUSES: ProjectStatus[] = ["completed", "ongoing", "upcoming"];
+const CATEGORIES: ProjectCategory[] = [
+  "residential",
+  "commercial",
+  "industrial",
+  "road",
+  "renovation",
+  "other",
+];
+
+type Search = { status?: ProjectStatus | undefined; category?: ProjectCategory | undefined };
+
 export const Route = createFileRoute("/projects")({
-  head: () =>
-    pageHead(
-      "Our Projects",
-      "Explore residential, commercial, and renovation spaces in the Hangool portfolio.",
-    ),
+  head: () => pageHead("projects", "/projects"),
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    status: STATUSES.includes(s["status"] as ProjectStatus)
+      ? (s["status"] as ProjectStatus)
+      : undefined,
+    category: CATEGORIES.includes(s["category"] as ProjectCategory)
+      ? (s["category"] as ProjectCategory)
+      : undefined,
+  }),
   component: Projects,
 });
+
 function Projects() {
-  const [filter, setFilter] = useState("All Projects");
-  const [selected, setSelected] = useState<Project | null>(null);
-  const [photo, setPhoto] = useState(0);
-  const [open, setOpen] = useState(false);
-  const reduced = useReducedMotion();
+  const { t } = useI18n();
+  const loc = useLocalize();
+  usePageMeta(t.seo.projects);
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/projects" });
+  const projects = useProjects();
+  const set = (patch: Search) =>
+    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true, resetScroll: false });
+  const results = projects.data.filter(
+    (p) =>
+      (!search.status || p.status === search.status) &&
+      (!search.category || p.category === search.category),
+  );
+  const usedCategories = CATEGORIES.filter((c) => projects.data.some((p) => p.category === c));
+
   return (
     <>
       <PageHeading
-        eyebrow="Our portfolio"
-        title="Spaces with purpose."
-        description="Homes for families. Places for businesses. A lasting foundation for the next chapter."
+        eyebrow={t.projects.eyebrow}
+        title={t.projects.title}
+        description={t.projects.description}
       />
       <section className="section">
         <div className="site-container">
-          <div className="flex flex-wrap gap-3 mb-9" aria-label="Project categories">
-            {["All Projects", "Residential", "Commercial", "Renovation"].map((f) => (
-              <Button
-                key={f}
-                variant={filter === f ? "default" : "outline"}
-                onClick={() => setFilter(f)}
-                aria-pressed={filter === f}
-              >
-                {f}
-              </Button>
-            ))}
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">
-            {projects
-              .filter((p) => filter === "All Projects" || p.category === filter)
-              .map((p) => (
-                <ProjectCard
-                  key={p.id}
-                  project={p}
-                  onOpen={() => {
-                    setSelected(p);
-                    setPhoto(0);
-                    setOpen(true);
-                  }}
-                />
-              ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-8">
-            Sample portfolio · Images and details will be replaced with actual Hangool projects.
-          </p>
-        </div>
-      </section>
-      <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-        <AnimatePresence onExitComplete={() => { if (!open) setSelected(null); }}>
-        {open && <DialogPrimitive.Portal forceMount>
-        <DialogPrimitive.Overlay forceMount asChild><motion.div className="fixed inset-0 z-50 bg-deep-green/80" initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .25 }} /></DialogPrimitive.Overlay>
-        <DialogPrimitive.Content forceMount asChild><motion.div className="project-dialog" initial={reduced ? false : { opacity: 0, scale: .96, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: reduced ? 1 : .97, y: reduced ? 0 : 12 }} transition={{ duration: reduced ? 0 : .35 }}>
-          <DialogPrimitive.Close asChild><Button variant="ghost" size="icon" className="absolute right-3 top-3" aria-label="Close"><X /></Button></DialogPrimitive.Close>
-          {selected && (
+          {projects.loading ? (
+            <LoadingGrid count={6} />
+          ) : !projects.data.length ? (
+            <EmptyState
+              title={t.projects.emptyTitle}
+              text={t.projects.emptyText}
+              offline={projects.error}
+            />
+          ) : (
             <>
-              <DialogTitle className="pr-5 leading-7">{selected.name}</DialogTitle>
-              <DialogDescription>{selected.category} · Sample project</DialogDescription>
-              <img
-                src={selected.gallery[photo]}
-                alt={`${selected.name} — photo ${photo + 1}`}
-                className="w-full aspect-[16/10] object-cover rounded-sm"
-              />
-              <div className="flex gap-3">
-                {selected.gallery.map((img, i) => (
+              <div className="space-y-4 mb-10">
+                <div className="filter-bar" role="group" aria-label={t.projects.status}>
                   <Button
-                    key={img}
-                    variant={photo === i ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setPhoto(i)}
+                    variant={!search.status ? "default" : "outline"}
+                    aria-pressed={!search.status}
+                    onClick={() => set({ status: undefined })}
                   >
-                    Photo {i + 1}
+                    {t.projects.allStatuses}
                   </Button>
-                ))}
+                  {STATUSES.map((s) => (
+                    <Button
+                      key={s}
+                      variant={search.status === s ? "default" : "outline"}
+                      aria-pressed={search.status === s}
+                      onClick={() => set({ status: s })}
+                    >
+                      {t.projects.statuses[s]}
+                    </Button>
+                  ))}
+                </div>
+                {usedCategories.length > 1 && (
+                  <div className="filter-bar" role="group" aria-label={t.projects.category}>
+                    <Button
+                      size="sm"
+                      variant={!search.category ? "secondary" : "ghost"}
+                      aria-pressed={!search.category}
+                      onClick={() => set({ category: undefined })}
+                    >
+                      {t.projects.allCategories}
+                    </Button>
+                    {usedCategories.map((c) => (
+                      <Button
+                        key={c}
+                        size="sm"
+                        variant={search.category === c ? "secondary" : "ghost"}
+                        aria-pressed={search.category === c}
+                        onClick={() => set({ category: c })}
+                      >
+                        {t.projects.categories[c]}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="flex flex-wrap gap-5 text-sm text-muted-foreground">
-                <span className="flex items-center gap-2">
-                  <MapPin className="size-4" />
-                  {selected.location}
-                </span>
-                <span className="flex items-center gap-2">
-                  <Calendar className="size-4" />
-                  {selected.year}
-                </span>
-              </div>
-              <p className="text-sm leading-7">{selected.description}</p>
+              {results.length ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">
+                  {results.map((p) => (
+                    <MediaCard
+                      key={p.id}
+                      to="/project"
+                      id={p.id}
+                      image={p.images[0] ? storageUrl(p.images[0]) : images.construction}
+                      title={loc(p.name, p.name_so)}
+                      eyebrow={t.projects.categories[p.category]}
+                      location={p.location}
+                      badge={t.projects.statuses[p.status]}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-state section-copy">{t.projects.noResults}</p>
+              )}
             </>
           )}
-        </motion.div></DialogPrimitive.Content></DialogPrimitive.Portal>}
-        </AnimatePresence>
-      </DialogPrimitive.Root>
+        </div>
+      </section>
       <CTA />
     </>
   );

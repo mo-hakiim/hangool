@@ -11,10 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as CareersRouteImport } from './routes/careers'
+import { Route as ConstructionRouteImport } from './routes/construction'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as ProjectRouteImport } from './routes/project'
 import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as PropertyRouteImport } from './routes/property'
+import { Route as QuoteRouteImport } from './routes/quote'
+import { Route as RealEstateRouteImport } from './routes/real-estate'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as TeamRouteImport } from './routes/team'
+import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as NewsPostRouteImport } from './routes/news.post'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -26,9 +36,24 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConstructionRoute = ConstructionRouteImport.update({
+  id: '/construction',
+  path: '/construction',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MediaRoute = MediaRouteImport.update({
@@ -36,9 +61,29 @@ const MediaRoute = MediaRouteImport.update({
   path: '/media',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectRoute = ProjectRouteImport.update({
+  id: '/project',
+  path: '/project',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropertyRoute = PropertyRouteImport.update({
+  id: '/property',
+  path: '/property',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuoteRoute = QuoteRouteImport.update({
+  id: '/quote',
+  path: '/quote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RealEstateRoute = RealEstateRouteImport.update({
+  id: '/real-estate',
+  path: '/real-estate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -46,54 +91,151 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsPostRoute = NewsPostRouteImport.update({
+  id: '/news/post',
+  path: '/news/post',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/careers': typeof CareersRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
+  '/gallery': typeof GalleryRoute
   '/media': typeof MediaRoute
+  '/project': typeof ProjectRoute
   '/projects': typeof ProjectsRoute
+  '/property': typeof PropertyRoute
+  '/quote': typeof QuoteRoute
+  '/real-estate': typeof RealEstateRoute
   '/services': typeof ServicesRoute
+  '/team': typeof TeamRoute
+  '/news/post': typeof NewsPostRoute
+  '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/careers': typeof CareersRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
+  '/gallery': typeof GalleryRoute
   '/media': typeof MediaRoute
+  '/project': typeof ProjectRoute
   '/projects': typeof ProjectsRoute
+  '/property': typeof PropertyRoute
+  '/quote': typeof QuoteRoute
+  '/real-estate': typeof RealEstateRoute
   '/services': typeof ServicesRoute
+  '/team': typeof TeamRoute
+  '/news/post': typeof NewsPostRoute
+  '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/careers': typeof CareersRoute
+  '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
+  '/gallery': typeof GalleryRoute
   '/media': typeof MediaRoute
+  '/project': typeof ProjectRoute
   '/projects': typeof ProjectsRoute
+  '/property': typeof PropertyRoute
+  '/quote': typeof QuoteRoute
+  '/real-estate': typeof RealEstateRoute
   '/services': typeof ServicesRoute
+  '/team': typeof TeamRoute
+  '/news/post': typeof NewsPostRoute
+  '/news/': typeof NewsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/contact' | '/media' | '/projects' | '/services'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/careers'
+    | '/construction'
+    | '/contact'
+    | '/gallery'
+    | '/media'
+    | '/project'
+    | '/projects'
+    | '/property'
+    | '/quote'
+    | '/real-estate'
+    | '/services'
+    | '/team'
+    | '/news/post'
+    | '/news/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/contact' | '/media' | '/projects' | '/services'
+  to:
+    | '/'
+    | '/about'
+    | '/careers'
+    | '/construction'
+    | '/contact'
+    | '/gallery'
+    | '/media'
+    | '/project'
+    | '/projects'
+    | '/property'
+    | '/quote'
+    | '/real-estate'
+    | '/services'
+    | '/team'
+    | '/news/post'
+    | '/news'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/careers'
+    | '/construction'
     | '/contact'
+    | '/gallery'
     | '/media'
+    | '/project'
     | '/projects'
+    | '/property'
+    | '/quote'
+    | '/real-estate'
     | '/services'
+    | '/team'
+    | '/news/post'
+    | '/news/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  CareersRoute: typeof CareersRoute
+  ConstructionRoute: typeof ConstructionRoute
   ContactRoute: typeof ContactRoute
+  GalleryRoute: typeof GalleryRoute
   MediaRoute: typeof MediaRoute
+  ProjectRoute: typeof ProjectRoute
   ProjectsRoute: typeof ProjectsRoute
+  PropertyRoute: typeof PropertyRoute
+  QuoteRoute: typeof QuoteRoute
+  RealEstateRoute: typeof RealEstateRoute
   ServicesRoute: typeof ServicesRoute
+  TeamRoute: typeof TeamRoute
+  NewsPostRoute: typeof NewsPostRoute
+  NewsIndexRoute: typeof NewsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -112,11 +254,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/construction': {
+      id: '/construction'
+      path: '/construction'
+      fullPath: '/construction'
+      preLoaderRoute: typeof ConstructionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/media': {
@@ -126,11 +289,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MediaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/project': {
+      id: '/project'
+      path: '/project'
+      fullPath: '/project'
+      preLoaderRoute: typeof ProjectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projects': {
       id: '/projects'
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/property': {
+      id: '/property'
+      path: '/property'
+      fullPath: '/property'
+      preLoaderRoute: typeof PropertyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quote': {
+      id: '/quote'
+      path: '/quote'
+      fullPath: '/quote'
+      preLoaderRoute: typeof QuoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/real-estate': {
+      id: '/real-estate'
+      path: '/real-estate'
+      fullPath: '/real-estate'
+      preLoaderRoute: typeof RealEstateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -140,16 +331,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/': {
+      id: '/news/'
+      path: '/news'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/post': {
+      id: '/news/post'
+      path: '/news/post'
+      fullPath: '/news/post'
+      preLoaderRoute: typeof NewsPostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  CareersRoute: CareersRoute,
+  ConstructionRoute: ConstructionRoute,
   ContactRoute: ContactRoute,
+  GalleryRoute: GalleryRoute,
   MediaRoute: MediaRoute,
+  ProjectRoute: ProjectRoute,
   ProjectsRoute: ProjectsRoute,
+  PropertyRoute: PropertyRoute,
+  QuoteRoute: QuoteRoute,
+  RealEstateRoute: RealEstateRoute,
   ServicesRoute: ServicesRoute,
+  TeamRoute: TeamRoute,
+  NewsPostRoute: NewsPostRoute,
+  NewsIndexRoute: NewsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

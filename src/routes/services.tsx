@@ -1,48 +1,82 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Check } from "lucide-react";
-import { services } from "../../company-data";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowUpRight, Check, HardHat, KeyRound } from "lucide-react";
+import { images } from "../../company-data";
 import { CTA, PageHeading } from "@/components/site";
-import { pageHead } from "@/lib/seo";
+import { pageHead, usePageMeta } from "@/lib/seo";
+import { useI18n } from "@/i18n";
+
 export const Route = createFileRoute("/services")({
-  head: () =>
-    pageHead(
-      "Our Services",
-      "Residential construction, commercial buildings, renovation, project management, and building materials in Hargeisa.",
-    ),
+  head: () => pageHead("services", "/services"),
   component: Services,
 });
+
+const serviceImages = [
+  images.residence,
+  images.commercial,
+  images.interior,
+  images.construction,
+  images.construction,
+];
+
 function Services() {
+  const { t } = useI18n();
+  usePageMeta(t.seo.services);
   return (
     <>
       <PageHeading
-        eyebrow="Our expertise"
-        title="Built around your ambition."
-        description="A complete approach to construction — thoughtful planning, reliable delivery, and care in every finish."
+        eyebrow={t.services.eyebrow}
+        title={t.services.title}
+        description={t.services.description}
       />
+      <section className="section">
+        <div className="site-container">
+          <div className="eyebrow text-primary mb-4">{t.services.deptEyebrow}</div>
+          <h2 className="section-title mb-9">{t.services.deptTitle}</h2>
+          <div className="grid md:grid-cols-2 gap-5">
+            {(
+              [
+                ["/construction", HardHat, t.services.construction],
+                ["/real-estate", KeyRound, t.services.realEstate],
+              ] as const
+            ).map(([to, Icon, d]) => (
+              <Link key={to} to={to} className="service-card">
+                <Icon className="service-icon" />
+                <h3 className="font-bold text-lg">{d.title}</h3>
+                <p className="section-copy mt-3">{d.text}</p>
+                <span className="text-primary text-sm font-bold mt-5 flex items-center gap-2">
+                  {t.services.explore} <ArrowUpRight className="size-4" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
       <div className="site-container">
-        {services.map((s, i) => (
+        {t.services.items.map((s, i) => (
           <section
-            key={s.title}
-            className="section border-b border-border grid md:grid-cols-2 gap-10 md:gap-16 items-center"
+            key={i}
+            className="section border-t border-border grid md:grid-cols-2 gap-10 md:gap-16 items-center"
           >
             <img
-              src={s.image}
+              src={serviceImages[i] ?? images.construction}
               alt={s.title}
               loading="lazy"
+              decoding="async"
               className={`w-full aspect-[4/3] object-cover rounded-sm ${i % 2 ? "md:order-2" : ""}`}
             />
             <div>
-              <div className="eyebrow text-primary mb-4">0{i + 1} / Our services</div>
+              <div className="eyebrow text-primary mb-4">
+                0{i + 1} / {t.services.listEyebrow}
+              </div>
               <h2 className="section-title">{s.title}</h2>
               <p className="section-copy mt-5">
-                {s.short} We work closely with you to understand your goals, agree a clear plan, and
-                deliver with care.
+                {s.short} {t.services.workWithYou}
               </p>
               <ul className="space-y-4 mt-7">
-                {s.includes.map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-sm">
+                {s.includes.map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm">
                     <Check className="size-4 text-primary" />
-                    {t}
+                    {item}
                   </li>
                 ))}
               </ul>

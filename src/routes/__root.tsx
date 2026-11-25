@@ -9,11 +9,14 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader, SiteFooter } from "../components/site";
 import { MotionShell } from "../components/motion";
+import { LanguageProvider } from "../i18n";
+import { SITE_NAME } from "../lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -77,23 +80,13 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
-    // Replace these placeholders with the app's name and description when first building the app.
-    // Each content route, / included, must still set its own head(). Never add og:image or
-    // twitter:image here: every page without its own would inherit the root's preview image.
+    // Each content route, / included, sets its own head() through pageHead() in src/lib/seo.ts.
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Hangool Construction & Real Estate" },
-      {
-        name: "description",
-        content:
-          "Homes and developments rooted in Somali heritage, built for tomorrow in Hargeisa, Somaliland.",
-      },
+      { title: SITE_NAME },
       { name: "author", content: "Hangool" },
-      { property: "og:title", content: "Hangool Construction & Real Estate" },
-      { property: "og:description", content: "Rooted in heritage. Built for tomorrow." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#1a3d2e" },
     ],
     links: [
       {
@@ -131,15 +124,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const isAdmin = useRouterState({ select: (s) => /^\/admin(\/|$)/.test(s.location.pathname) });
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <MotionShell>
-        <SiteHeader />
-        <main><Outlet /></main>
-        <SiteFooter />
-      </MotionShell>
+      <LanguageProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        {isAdmin ? (
+          <Outlet />
+        ) : (
+          <MotionShell>
+            <SiteHeader />
+            <main>
+              <Outlet />
+            </main>
+            <SiteFooter />
+          </MotionShell>
+        )}
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

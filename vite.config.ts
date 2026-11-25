@@ -17,15 +17,27 @@ const base = `/${rawBase.replace(/^\/+|\/+$/g, "")}/`.replace(/^\/\/$/, "/");
 export default defineConfig({
   vite: { base },
   tanstackStart: {
+    // Every page is prerendered to static HTML for GitHub Pages. Detail pages
+    // (/project, /property, /news/post) are one page each that loads ?id= in the browser.
     pages: [
-      { path: "/" },
-      { path: "/about" },
-      { path: "/services" },
-      { path: "/projects" },
-      { path: "/media" },
-      { path: "/contact" },
-    ],
-    prerender: { enabled: true, autoStaticPathsDiscovery: false },
+      "/",
+      "/about",
+      "/services",
+      "/construction",
+      "/real-estate",
+      "/projects",
+      "/project",
+      "/property",
+      "/gallery",
+      "/media",
+      "/team",
+      "/news",
+      "/news/post",
+      "/careers",
+      "/contact",
+      "/quote",
+    ].map((path) => ({ path })),
+    prerender: { enabled: true, autoStaticPathsDiscovery: false, crawlLinks: false },
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },

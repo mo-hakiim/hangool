@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useRouterState } from '@tanstack/react-router';
 import { animate, motion, useInView, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { services } from '../../company-data';
+import { useI18n } from '@/i18n';
 
 export function MotionShell({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
@@ -99,8 +99,10 @@ export function HeroImage({ src, alt }: { src: string; alt: string }) {
   return <motion.img src={src} alt={alt} className="hero-photo" fetchPriority="high" style={reduced ? {} : { scale, y }} />;
 }
 export function ServiceMarquee() {
+  const { t } = useI18n();
+  const services = t.construction.items;
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref);
-  return <div ref={ref} className="service-marquee" aria-label="Our construction services"><motion.div className="marquee-track" animate={!reduced && inView ? { x: ['0%', '-50%'] } : { x: '0%' }} transition={!reduced && inView ? { duration: 26, repeat: Infinity, ease: 'linear' } : { duration: 0 }}>{[0,1].map(copy => <div key={copy} className="marquee-group" aria-hidden={copy === 1}>{services.map(s => <span key={s.title}>{s.title}<span className="marquee-dot" /></span>)}</div>)}</motion.div></div>;
+  return <div ref={ref} className="service-marquee" aria-label={t.construction.listTitle}><motion.div className="marquee-track" animate={!reduced && inView ? { x: ['0%', '-50%'] } : { x: '0%' }} transition={!reduced && inView ? { duration: 26, repeat: Infinity, ease: 'linear' } : { duration: 0 }}>{[0,1].map(copy => <div key={copy} className="marquee-group" aria-hidden={copy === 1}>{services.map(s => <span key={s.title}>{s.title}<span className="marquee-dot" /></span>)}</div>)}</motion.div></div>;
 }
