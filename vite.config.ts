@@ -36,6 +36,18 @@ export default defineConfig({
       "/careers",
       "/contact",
       "/quote",
+      // Admin dashboard (noindex). Rendered as an empty shell; sign-in runs in the browser.
+      "/admin",
+      "/admin/login",
+      "/admin/reset-password",
+      "/admin/requests",
+      "/admin/projects",
+      "/admin/properties",
+      "/admin/gallery",
+      "/admin/team",
+      "/admin/news",
+      "/admin/careers",
+      "/admin/settings",
     ].map((path) => ({ path })),
     prerender: { enabled: true, autoStaticPathsDiscovery: false, crawlLinks: false },
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).

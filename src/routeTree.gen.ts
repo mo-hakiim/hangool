@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ConstructionRouteImport } from './routes/construction'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -23,6 +24,17 @@ import { Route as QuoteRouteImport } from './routes/quote'
 import { Route as RealEstateRouteImport } from './routes/real-estate'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TeamRouteImport } from './routes/team'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminCareersRouteImport } from './routes/admin.careers'
+import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminNewsRouteImport } from './routes/admin.news'
+import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
+import { Route as AdminPropertiesRouteImport } from './routes/admin.properties'
+import { Route as AdminRequestsRouteImport } from './routes/admin.requests'
+import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsPostRouteImport } from './routes/news.post'
 
@@ -34,6 +46,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CareersRoute = CareersRouteImport.update({
@@ -96,6 +113,61 @@ const TeamRoute = TeamRouteImport.update({
   path: '/team',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCareersRoute = AdminCareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGalleryRoute = AdminGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNewsRoute = AdminNewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProjectsRoute = AdminProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPropertiesRoute = AdminPropertiesRouteImport.update({
+  id: '/properties',
+  path: '/properties',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRequestsRoute = AdminRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AdminRoute,
+} as any)
 const NewsIndexRoute = NewsIndexRouteImport.update({
   id: '/news/',
   path: '/news/',
@@ -110,6 +182,7 @@ const NewsPostRoute = NewsPostRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/careers': typeof CareersRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -122,7 +195,18 @@ export interface FileRoutesByFullPath {
   '/real-estate': typeof RealEstateRoute
   '/services': typeof ServicesRoute
   '/team': typeof TeamRoute
+  '/admin/careers': typeof AdminCareersRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/news': typeof AdminNewsRoute
+  '/admin/projects': typeof AdminProjectsRoute
+  '/admin/properties': typeof AdminPropertiesRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
   '/news/post': typeof NewsPostRoute
+  '/admin/': typeof AdminIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -140,13 +224,25 @@ export interface FileRoutesByTo {
   '/real-estate': typeof RealEstateRoute
   '/services': typeof ServicesRoute
   '/team': typeof TeamRoute
+  '/admin/careers': typeof AdminCareersRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/news': typeof AdminNewsRoute
+  '/admin/projects': typeof AdminProjectsRoute
+  '/admin/properties': typeof AdminPropertiesRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
   '/news/post': typeof NewsPostRoute
+  '/admin': typeof AdminIndexRoute
   '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/careers': typeof CareersRoute
   '/construction': typeof ConstructionRoute
   '/contact': typeof ContactRoute
@@ -159,7 +255,18 @@ export interface FileRoutesById {
   '/real-estate': typeof RealEstateRoute
   '/services': typeof ServicesRoute
   '/team': typeof TeamRoute
+  '/admin/careers': typeof AdminCareersRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/news': typeof AdminNewsRoute
+  '/admin/projects': typeof AdminProjectsRoute
+  '/admin/properties': typeof AdminPropertiesRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
   '/news/post': typeof NewsPostRoute
+  '/admin/': typeof AdminIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRouteTypes {
@@ -167,6 +274,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/careers'
     | '/construction'
     | '/contact'
@@ -179,7 +287,18 @@ export interface FileRouteTypes {
     | '/real-estate'
     | '/services'
     | '/team'
+    | '/admin/careers'
+    | '/admin/gallery'
+    | '/admin/login'
+    | '/admin/news'
+    | '/admin/projects'
+    | '/admin/properties'
+    | '/admin/requests'
+    | '/admin/reset-password'
+    | '/admin/settings'
+    | '/admin/team'
     | '/news/post'
+    | '/admin/'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -197,12 +316,24 @@ export interface FileRouteTypes {
     | '/real-estate'
     | '/services'
     | '/team'
+    | '/admin/careers'
+    | '/admin/gallery'
+    | '/admin/login'
+    | '/admin/news'
+    | '/admin/projects'
+    | '/admin/properties'
+    | '/admin/requests'
+    | '/admin/reset-password'
+    | '/admin/settings'
+    | '/admin/team'
     | '/news/post'
+    | '/admin'
     | '/news'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/careers'
     | '/construction'
     | '/contact'
@@ -215,13 +346,25 @@ export interface FileRouteTypes {
     | '/real-estate'
     | '/services'
     | '/team'
+    | '/admin/careers'
+    | '/admin/gallery'
+    | '/admin/login'
+    | '/admin/news'
+    | '/admin/projects'
+    | '/admin/properties'
+    | '/admin/requests'
+    | '/admin/reset-password'
+    | '/admin/settings'
+    | '/admin/team'
     | '/news/post'
+    | '/admin/'
     | '/news/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CareersRoute: typeof CareersRoute
   ConstructionRoute: typeof ConstructionRoute
   ContactRoute: typeof ContactRoute
@@ -252,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/careers': {
@@ -338,6 +488,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/careers': {
+      id: '/admin/careers'
+      path: '/careers'
+      fullPath: '/admin/careers'
+      preLoaderRoute: typeof AdminCareersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/gallery': {
+      id: '/admin/gallery'
+      path: '/gallery'
+      fullPath: '/admin/gallery'
+      preLoaderRoute: typeof AdminGalleryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/news': {
+      id: '/admin/news'
+      path: '/news'
+      fullPath: '/admin/news'
+      preLoaderRoute: typeof AdminNewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/projects': {
+      id: '/admin/projects'
+      path: '/projects'
+      fullPath: '/admin/projects'
+      preLoaderRoute: typeof AdminProjectsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/properties': {
+      id: '/admin/properties'
+      path: '/properties'
+      fullPath: '/admin/properties'
+      preLoaderRoute: typeof AdminPropertiesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/requests': {
+      id: '/admin/requests'
+      path: '/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AdminRequestsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reset-password': {
+      id: '/admin/reset-password'
+      path: '/reset-password'
+      fullPath: '/admin/reset-password'
+      preLoaderRoute: typeof AdminResetPasswordRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/news/': {
       id: '/news/'
       path: '/news'
@@ -355,9 +582,40 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminCareersRoute: typeof AdminCareersRoute
+  AdminGalleryRoute: typeof AdminGalleryRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminNewsRoute: typeof AdminNewsRoute
+  AdminProjectsRoute: typeof AdminProjectsRoute
+  AdminPropertiesRoute: typeof AdminPropertiesRoute
+  AdminRequestsRoute: typeof AdminRequestsRoute
+  AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTeamRoute: typeof AdminTeamRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminCareersRoute: AdminCareersRoute,
+  AdminGalleryRoute: AdminGalleryRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminNewsRoute: AdminNewsRoute,
+  AdminProjectsRoute: AdminProjectsRoute,
+  AdminPropertiesRoute: AdminPropertiesRoute,
+  AdminRequestsRoute: AdminRequestsRoute,
+  AdminResetPasswordRoute: AdminResetPasswordRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminTeamRoute: AdminTeamRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   CareersRoute: CareersRoute,
   ConstructionRoute: ConstructionRoute,
   ContactRoute: ContactRoute,
