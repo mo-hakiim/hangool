@@ -89,9 +89,29 @@ describe("form validation", () => {
     ).toBe("invalidEmail");
   });
   it("quote needs a service type; viewing doesn't need a message", () => {
-    expect(validate("quote", { name: "A", phone: "0631234567", message: "x" })["service_type"]).toBe(
-      "required",
-    );
+    expect(
+      validate("quote", { name: "A", phone: "0631234567", message: "x" })["service_type"],
+    ).toBe("required");
     expect(validate("viewing", { name: "A", phone: "0631234567" })).toEqual({});
+  });
+});
+describe("company-data.ts built-in contact details", () => {
+  it("uses the real phone, WhatsApp and email links", async () => {
+    const { company } = await import("../../company-data");
+    expect(company.phoneHref).toBe("tel:+252636378888");
+    expect(company.whatsappUrl).toBe("https://wa.me/252636378888");
+    expect(company.emailHref).toBe("mailto:info@hangooldevelopment.com");
+    expect(mergeSettings(null).whatsappUrl).toBe(company.whatsappUrl);
+  });
+  it("lists four social links, all real https URLs and no LinkedIn", async () => {
+    const { company } = await import("../../company-data");
+    expect(company.socials.map((s) => s.name)).toEqual([
+      "Facebook",
+      "TikTok",
+      "Instagram",
+      "YouTube",
+    ]);
+    for (const s of company.socials) expect(s.url).toMatch(/^https:\/\/www\./);
+    expect(JSON.stringify(company)).not.toMatch(/linkedin/i);
   });
 });
