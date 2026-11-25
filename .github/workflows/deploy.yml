@@ -24,8 +24,6 @@ jobs:
       - run: bun run build
         env:
           BASE_PATH: /
-      # public/404.html is copied verbatim, so point its links at the base path.
-      - run: sed -i 's#href="/#href="/hangool/#g' .output/public/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .output/public

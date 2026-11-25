@@ -11,7 +11,8 @@ import {
   Facebook,
   Instagram,
   Youtube,
-  Music2,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { company, type Project } from "../../company-data";
@@ -98,27 +99,40 @@ export function SiteHeader() {
     </header>
   );
 }
-export function SocialLinks() {
-  const icons = [Facebook, Instagram, Music2, Youtube];
+function TikTokIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.6 2.6 0 0 1-2.6-2.6 2.6 2.6 0 0 1 3.37-2.48V9.66a5.73 5.73 0 0 0-.77-.05 5.68 5.68 0 1 0 5.68 5.68V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.3 4.3 0 0 1-3.24-1.48Z" />
+    </svg>
+  );
+}
+const socialIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  Facebook,
+  TikTok: TikTokIcon,
+  Instagram,
+  YouTube: Youtube,
+};
+export function SocialLinks({ variant = "hero" }: { variant?: "hero" | "outline" }) {
   return (
     <div className="flex flex-wrap gap-3">
-      {company.socials.map((s, i) => {
-        const Icon = icons[i];
-        return (
-          <Button key={s.name} variant="hero" size="icon" asChild>
-            <a
-              href={s.url.startsWith("https://") ? s.url : undefined}
-              aria-label={`${s.name}${s.url.includes("[") ? " — link coming soon" : ""}`}
-              title={s.url.includes("[") ? `${s.name} — link coming soon` : s.name}
-              aria-disabled={s.url.includes("[")}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {Icon && <Icon />}
-            </a>
-          </Button>
-        );
-      })}
+      {company.socials
+        .filter((s) => s.url.startsWith("https://"))
+        .map((s) => {
+          const Icon = socialIcons[s.name];
+          return (
+            <Button key={s.name} variant={variant} size="icon" asChild>
+              <a
+                href={s.url}
+                aria-label={`Hangool on ${s.name} (opens in a new tab)`}
+                title={s.name}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {Icon && <Icon />}
+              </a>
+            </Button>
+          );
+        })}
     </div>
   );
 }
@@ -134,9 +148,7 @@ export function SiteFooter() {
               className="brand-image footer-logo"
             />
             <p className="mt-5 text-sm leading-7 opacity-65 max-w-xs">
-              Rooted in heritage. Built for tomorrow.
-              <br />
-              Homes and developments made to last.
+              {company.footerDescription}
             </p>
           </div>
           <div>
@@ -151,10 +163,24 @@ export function SiteFooter() {
           </div>
           <div>
             <h3 className="text-sm font-semibold mb-5">Get in touch</h3>
-            <div className="space-y-3 text-sm opacity-70">
-              <p>{company.address}</p>
-              <p>{company.phone}</p>
-              <p>{company.email}</p>
+            <div className="flex flex-col gap-3 text-sm opacity-70">
+              <a href={company.phoneHref} className="flex items-center gap-2 hover:opacity-100">
+                <Phone className="size-4" /> {company.phone}
+              </a>
+              <a
+                href={company.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:opacity-100"
+              >
+                <MessageCircle className="size-4" /> WhatsApp
+              </a>
+              <a
+                href={company.emailHref}
+                className="flex items-center gap-2 break-all hover:opacity-100"
+              >
+                <Mail className="size-4 shrink-0" /> {company.email}
+              </a>
             </div>
           </div>
           <div>
@@ -175,9 +201,15 @@ export function SiteFooter() {
         asChild
         className="floating-contact h-13 w-13 rounded-full"
       >
-        <Link to="/contact" aria-label="Contact Hangool on WhatsApp" title="Let's talk on WhatsApp">
+        <a
+          href={company.whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat with Hangool on WhatsApp (opens in a new tab)"
+          title="Let's talk on WhatsApp"
+        >
           <MessageCircle className="size-6" />
-        </Link>
+        </a>
       </Button>
     </>
   );
@@ -213,9 +245,9 @@ export function CTA() {
           </p>
         </div>
         <Button variant="gold" size="lg" asChild>
-          <Link to="/contact">
+          <a href={company.whatsappUrl} target="_blank" rel="noopener noreferrer">
             <MessageCircle /> Talk to us on WhatsApp <ArrowUpRight />
-          </Link>
+          </a>
         </Button>
       </div>
     </section>

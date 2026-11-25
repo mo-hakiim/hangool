@@ -17,3 +17,23 @@ describe("WhatsApp inquiries", () => {
     );
   });
 });
+describe("company contact details", () => {
+  it("uses the real phone, WhatsApp and email links", async () => {
+    const { company } = await import("../../company-data");
+    expect(company.phoneHref).toBe("tel:+252636378888");
+    expect(company.whatsappUrl).toBe("https://wa.me/252636378888");
+    expect(company.emailHref).toBe("mailto:info@hangooldevelopment.com");
+    expect(buildWhatsAppLink(company.whatsapp)?.split("?")[0]).toBe(company.whatsappUrl);
+  });
+  it("lists four social links, all real https URLs and no LinkedIn", async () => {
+    const { company } = await import("../../company-data");
+    expect(company.socials.map((s) => s.name)).toEqual([
+      "Facebook",
+      "TikTok",
+      "Instagram",
+      "YouTube",
+    ]);
+    for (const s of company.socials) expect(s.url).toMatch(/^https:\/\/www\./);
+    expect(JSON.stringify(company)).not.toMatch(/linkedin/i);
+  });
+});
