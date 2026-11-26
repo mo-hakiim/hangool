@@ -15,6 +15,7 @@ import {
   Phone,
   Mail,
   Inbox,
+  Lock,
   WifiOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { useSettings } from "@/data/live";
 import { fill, useI18n } from "@/i18n";
 import type { Dictionary } from "@/i18n/en";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { WhatsAppIcon } from "@/components/whatsapp-icon";
 import logo from "@/assets/hangool-logo.png";
 
 /* ---------------- Navigation ---------------- */
@@ -371,38 +373,32 @@ export function SiteFooter() {
             <SocialLinks />
           </div>
         </div>
-        <div className="site-container border-t border-primary-foreground/15 py-5 flex flex-wrap justify-between gap-4 text-xs opacity-60">
-          <span>
-            © {new Date().getFullYear()} Hangool Construction & Real Estate. {t.footer.rights}
-          </span>
-          <span className="flex flex-wrap gap-4">
-            <span>{t.footer.tagline}</span>
+        <div className="site-container border-t border-primary-foreground/15 py-5 pr-16 lg:pr-20 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-xs">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="opacity-60">
+              © {new Date().getFullYear()} Hangool Construction & Real Estate. {t.footer.rights}
+            </span>
             <a
               href={`${import.meta.env.BASE_URL}admin`}
               rel="nofollow"
-              className="underline-offset-4 hover:underline"
+              className="footer-admin-link"
             >
-              {t.footer.admin}
+              <Lock className="size-3.5" aria-hidden="true" /> {t.footer.admin}
             </a>
-          </span>
+          </div>
+          <span className="opacity-60">{t.footer.tagline}</span>
         </div>
       </footer>
-      <Button
-        variant="default"
-        size="icon"
-        asChild
-        className="floating-contact h-13 w-13 rounded-full"
+      <a
+        href={settings.whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t.common.chatWhatsApp}
+        title={t.common.whatsappTitle}
+        className="floating-contact floating-whatsapp"
       >
-        <a
-          href={settings.whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={t.common.chatWhatsApp}
-          title={t.common.whatsappTitle}
-        >
-          <MessageCircle className="size-6" />
-        </a>
-      </Button>
+        <WhatsAppIcon className="size-7" />
+      </a>
     </>
   );
 }
