@@ -9,8 +9,10 @@ import {
   Inbox,
   KeyRound,
   LayoutDashboard,
+  Lock,
   Newspaper,
   Settings,
+  UserCog,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -28,26 +30,73 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Logo } from "@/admin/logo";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import type { StaffRole } from "@/lib/supabase";
 import { AccountMenu } from "./account";
+import { useAdminAuth } from "./auth";
 
 export const inputClass =
   "h-11 w-full rounded-sm border border-input bg-card px-3.5 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30 sm:text-sm";
 export const textareaClass =
   "min-h-24 w-full rounded-sm border border-input bg-card px-3.5 py-2.5 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30 sm:text-sm";
 
+/** Who may open each dashboard area. The database enforces the same rules (RLS). */
+export const ACCESS = {
+  content: ["owner", "editor"],
+  requests: ["owner", "requests"],
+  owner: ["owner"],
+} as const satisfies Record<string, readonly StaffRole[]>;
+export type Area = keyof typeof ACCESS;
+
+export const ROLE_LABELS: Record<StaffRole, { name: string; description: string }> = {
+  owner: { name: "Owner", description: "Everything, including settings and managing staff" },
+  editor: {
+    name: "Editor",
+    description: "Add, edit and publish projects, properties, gallery, team, news and careers",
+  },
+  requests: {
+    name: "Requests",
+    description: "View and handle contact, quote and viewing requests only",
+  },
+};
+
+export const canAccess = (role: StaffRole | undefined, area: Area) =>
+  !!role && (ACCESS[area] as readonly StaffRole[]).includes(role);
+
 const sections = [
-  { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
-  { to: "/admin/requests", label: "Requests", icon: Inbox },
-  { to: "/admin/projects", label: "Projects", icon: HardHat },
-  { to: "/admin/properties", label: "Properties", icon: KeyRound },
-  { to: "/admin/gallery", label: "Gallery", icon: Images },
-  { to: "/admin/team", label: "Team", icon: Users },
-  { to: "/admin/news", label: "News", icon: Newspaper },
-  { to: "/admin/careers", label: "Careers", icon: Briefcase },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
+  { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true, area: null },
+  { to: "/admin/requests", label: "Requests", icon: Inbox, area: "requests" },
+  { to: "/admin/projects", label: "Projects", icon: HardHat, area: "content" },
+  { to: "/admin/properties", label: "Properties", icon: KeyRound, area: "content" },
+  { to: "/admin/gallery", label: "Gallery", icon: Images, area: "content" },
+  { to: "/admin/team", label: "Team", icon: Users, area: "content" },
+  { to: "/admin/news", label: "News", icon: Newspaper, area: "content" },
+  { to: "/admin/careers", label: "Careers", icon: Briefcase, area: "content" },
+  { to: "/admin/staff", label: "Staff", icon: UserCog, area: "owner" },
+  { to: "/admin/settings", label: "Settings", icon: Settings, area: "owner" },
 ] as const;
 
+/** Shows the page only to the roles allowed in this area; others get a clear message. */
+export function RequireRole({ area, children }: { area: Area; children: ReactNode }) {
+  const { role } = useAdminAuth();
+  if (canAccess(role, area)) return <>{children}</>;
+  return (
+    <Panel className="text-center py-12">
+      <Lock className="mx-auto size-8 text-muted-foreground" />
+      <h1 className="mt-3 text-xl font-bold">You don't have access to this section</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Your role is <strong>{role ? ROLE_LABELS[role].name : "unknown"}</strong>. Ask an owner if
+        you need access.
+      </p>
+      <Button asChild variant="outline" className="mt-5">
+        <Link to="/admin">Back to the overview</Link>
+      </Button>
+    </Panel>
+  );
+}
+
 export function AdminHeader() {
+  const { role } = useAdminAuth();
   const nav =
     "inline-flex shrink-0 items-center gap-1.5 rounded-sm px-3 py-2 text-sm font-semibold transition-colors hover:bg-muted";
   const active = "bg-muted text-primary";
@@ -76,17 +125,19 @@ export function AdminHeader() {
         className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2"
         aria-label="Dashboard sections"
       >
-        {sections.map((s) => (
-          <Link
-            key={s.to}
-            to={s.to}
-            activeOptions={{ exact: "exact" in s }}
-            className={nav}
-            activeProps={{ className: active }}
-          >
-            <s.icon className="size-4" /> {s.label}
-          </Link>
-        ))}
+        {sections
+          .filter((s) => s.area === null || canAccess(role, s.area))
+          .map((s) => (
+            <Link
+              key={s.to}
+              to={s.to}
+              activeOptions={{ exact: "exact" in s }}
+              className={nav}
+              activeProps={{ className: active }}
+            >
+              <s.icon className="size-4" /> {s.label}
+            </Link>
+          ))}
       </nav>
     </header>
   );

@@ -10,13 +10,14 @@ import {
 
 import {
   getSession,
-  isAdmin,
+  getStaff,
   signIn as apiSignIn,
   signOut as apiSignOut,
   supabaseEnabled,
   SupabaseError,
   updatePassword,
   type Session,
+  type StaffRole,
 } from "@/lib/supabase";
 
 export type AuthStatus =
@@ -25,11 +26,16 @@ export type AuthStatus =
   | "unreachable" // Supabase could not be reached
   | "signedOut"
   | "notAdmin"
+  | "deactivated" // staff row exists but the owner switched it off
   | "admin";
 
 type AuthValue = {
   status: AuthStatus;
   email: string | undefined;
+  /** The signed-in staff member's role (set when status is "admin"). */
+  role: StaffRole | undefined;
+  /** Their user id (to recognise "you" on the Staff page). */
+  userId: string | undefined;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   /** A valid access token for write requests (refreshes it if needed). */
@@ -46,12 +52,18 @@ const AuthContext = createContext<AuthValue | null>(null);
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>(supabaseEnabled ? "checking" : "unconfigured");
   const [session, setSession] = useState<Session | null>(null);
+  const [role, setRole] = useState<StaffRole | undefined>(undefined);
 
   const adopt = useCallback(async (s: Session | null) => {
     setSession(s);
+    setRole(undefined);
     if (!s) return setStatus("signedOut");
     try {
-      setStatus((await isAdmin(s)) ? "admin" : "notAdmin");
+      const staff = await getStaff(s);
+      if (!staff) return setStatus("notAdmin");
+      if (!staff.active) return setStatus("deactivated");
+      setRole(staff.role);
+      setStatus("admin");
     } catch (e) {
       setStatus(e instanceof SupabaseError && e.status === 0 ? "unreachable" : "signedOut");
     }
@@ -69,6 +81,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       email: session?.user.email,
+      role,
+      userId: session?.user.id,
       signIn: async (email, password) => {
         await adopt(await apiSignIn(email, password));
       },
@@ -109,7 +123,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       adoptSession: adopt,
       retry: check,
     }),
-    [status, session, adopt, check],
+    [status, session, role, adopt, check],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

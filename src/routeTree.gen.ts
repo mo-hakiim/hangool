@@ -34,6 +34,7 @@ import { Route as AdminPropertiesRouteImport } from './routes/admin.properties'
 import { Route as AdminRequestsRouteImport } from './routes/admin.requests'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsPostRouteImport } from './routes/news.post'
@@ -163,6 +164,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminStaffRoute = AdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
   '/admin/team': typeof AdminTeamRoute
   '/news/post': typeof NewsPostRoute
   '/admin/': typeof AdminIndexRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
   '/admin/team': typeof AdminTeamRoute
   '/news/post': typeof NewsPostRoute
   '/admin': typeof AdminIndexRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
   '/admin/team': typeof AdminTeamRoute
   '/news/post': typeof NewsPostRoute
   '/admin/': typeof AdminIndexRoute
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/reset-password'
     | '/admin/settings'
+    | '/admin/staff'
     | '/admin/team'
     | '/news/post'
     | '/admin/'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/reset-password'
     | '/admin/settings'
+    | '/admin/staff'
     | '/admin/team'
     | '/news/post'
     | '/admin'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/reset-password'
     | '/admin/settings'
+    | '/admin/staff'
     | '/admin/team'
     | '/news/post'
     | '/admin/'
@@ -558,6 +570,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/staff': {
+      id: '/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AdminStaffRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/team': {
       id: '/admin/team'
       path: '/team'
@@ -592,6 +611,7 @@ interface AdminRouteChildren {
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStaffRoute: typeof AdminStaffRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -606,6 +626,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRequestsRoute: AdminRequestsRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminStaffRoute: AdminStaffRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

@@ -84,16 +84,29 @@ function Gate() {
     );
   }
   if (status === "signedOut") return <LoginForm />;
-  if (status === "notAdmin") {
+  if (status === "notAdmin" || status === "deactivated") {
+    const off = status === "deactivated";
     return (
       <Centered>
         <Card>
           <ShieldAlert className="mx-auto size-8 text-destructive" />
-          <h1 className="mt-3 text-center text-2xl font-medium">Not an admin</h1>
+          <h1 className="mt-3 text-center text-2xl font-medium">
+            {off ? "Your account is deactivated" : "Not on the staff list"}
+          </h1>
           <p className="mt-2 text-center text-sm text-muted-foreground">
-            The password is correct, but <strong className="text-foreground">{email}</strong> isn't
-            on the website's admin list, so it can't manage the website. Ask the site manager to add
-            this account as an admin in Supabase, or sign out and use the owner's account.
+            {off ? (
+              <>
+                <strong className="text-foreground">{email}</strong> has been switched off by an
+                owner, so it can't use the dashboard. Ask an owner to reactivate it in Admin →
+                Staff.
+              </>
+            ) : (
+              <>
+                The password is correct, but <strong className="text-foreground">{email}</strong>{" "}
+                isn't on the website's staff list. Ask an owner to invite this address from Admin →
+                Staff.
+              </>
+            )}
           </p>
           <Button className="mt-6 w-full" variant="outline" onClick={() => void signOut()}>
             Sign out

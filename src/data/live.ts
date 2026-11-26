@@ -135,6 +135,7 @@ export type SettingsRow = {
   address: string | null;
   address_so: string | null;
   map_query: string | null;
+  notify_email?: string | null;
   updated_at: string;
 };
 

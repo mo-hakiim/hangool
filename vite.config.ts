@@ -48,6 +48,7 @@ export default defineConfig({
       "/admin/news",
       "/admin/careers",
       "/admin/settings",
+      "/admin/staff",
     ].map((path) => ({ path })),
     prerender: { enabled: true, autoStaticPathsDiscovery: false, crawlLinks: false },
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).

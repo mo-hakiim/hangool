@@ -1,16 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { BarChart3, MapPin, Phone, Save } from "lucide-react";
+import { BarChart3, BellRing, MapPin, Phone, Save } from "lucide-react";
 import { toast } from "sonner";
 
 import { company } from "../../company-data";
 import { useAdminRows, useAdminWrite } from "@/admin/data";
-import { ErrorBox, Field, Panel, Spinner, errorMessage, inputClass } from "@/admin/ui";
+import { ErrorBox, Field, Panel, RequireRole, Spinner, errorMessage, inputClass } from "@/admin/ui";
 import { Button } from "@/components/ui/button";
 import type { SettingsRow, Stats } from "@/data/live";
 
 export const Route = createFileRoute("/admin/settings")({
-  component: Settings,
+  component: () => (
+    <RequireRole area="owner">
+      <Settings />
+    </RequireRole>
+  ),
 });
 
 const STAT_LABELS: [keyof Stats, string][] = [
@@ -30,6 +34,7 @@ const TEXT_FIELDS = [
   "address",
   "address_so",
   "map_query",
+  "notify_email",
 ] as const;
 type TextField = (typeof TEXT_FIELDS)[number];
 
@@ -45,6 +50,7 @@ const placeholders: Record<TextField, string> = {
   address: "e.g. Road 1, Jigjiga Yar, Hargeisa",
   address_so: "tusaale: Waddada 1, Jigjiga Yar, Hargeysa",
   map_query: "e.g. Hangool office, Hargeisa  —  or  9.5624, 44.0770",
+  notify_email: company.email,
 };
 
 function Settings() {
@@ -98,6 +104,8 @@ function Settings() {
     }
     if (text.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text.email.trim()))
       return setError("The email address doesn't look right.");
+    if (text.notify_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text.notify_email.trim()))
+      return setError("The alert email address doesn't look right.");
     const patch: Record<string, unknown> = { stats: statsValue };
     for (const k of TEXT_FIELDS) patch[k] = text[k].trim() || null;
     setBusy(true);
@@ -190,6 +198,17 @@ function Settings() {
           {input("tiktok", "TikTok link")}
           {input("instagram", "Instagram link")}
           {input("youtube", "YouTube link")}
+        </div>
+      </Panel>
+
+      <Panel title="Email alerts">
+        <p className="text-sm text-muted-foreground flex gap-2 mb-4">
+          <BellRing className="size-4 shrink-0 mt-0.5 text-primary" />
+          Every new contact message, quote request and viewing request is emailed here. Leave empty
+          to use {company.email}.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {input("notify_email", "Alert email", undefined, "email")}
         </div>
       </Panel>
 

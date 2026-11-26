@@ -44,9 +44,12 @@ function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Staff invite links (type=invite) welcome the new person instead of "reset".
+  const [isInvite, setIsInvite] = useState(false);
 
   useEffect(() => {
     const hash = window.location.hash || initialUrlHash;
+    setIsInvite(new URLSearchParams(hash.replace(/^#/, "")).get("type") === "invite");
     // Don't leave the one-time tokens in the address bar or browser history.
     if (window.location.hash) {
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -105,7 +108,14 @@ function ResetPasswordPage() {
 
         {state.step === "form" && (
           <>
-            <h1 className="mt-6 text-center text-2xl font-medium">Choose a new password</h1>
+            <h1 className="mt-6 text-center text-2xl font-medium">
+              {isInvite ? "Welcome to the Hangool dashboard" : "Choose a new password"}
+            </h1>
+            {isInvite && (
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                You've been invited as staff. Choose a password to finish setting up your account.
+              </p>
+            )}
             <p className="mt-1 text-center text-sm text-muted-foreground">
               For <strong className="text-foreground">{state.session.user.email}</strong>
             </p>
@@ -147,9 +157,13 @@ function ResetPasswordPage() {
         {state.step === "done" && (
           <div className="mt-6 space-y-4 text-center">
             <CheckCircle2 className="mx-auto size-10 text-primary" />
-            <h1 className="text-2xl font-medium">Password updated</h1>
+            <h1 className="text-2xl font-medium">
+              {isInvite ? "You're all set" : "Password updated"}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              You're signed in. Use the new password next time.
+              {isInvite
+                ? "Your account is ready. Sign in at hangooldevelopment.com/admin with your email and this password."
+                : "You're signed in. Use the new password next time."}
             </p>
             <Button variant="default" className="w-full" onClick={toSignIn}>
               Open the dashboard

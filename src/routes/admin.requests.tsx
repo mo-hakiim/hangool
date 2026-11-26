@@ -4,7 +4,15 @@ import { CheckCircle2, Mail, MessageCircle, Phone, RotateCcw, Trash2 } from "luc
 import { toast } from "sonner";
 
 import { useAdminRows, useAdminWrite, type Row } from "@/admin/data";
-import { ConfirmDelete, ErrorBox, Panel, Spinner, errorMessage, textareaClass } from "@/admin/ui";
+import {
+  ConfirmDelete,
+  ErrorBox,
+  Panel,
+  RequireRole,
+  Spinner,
+  errorMessage,
+  textareaClass,
+} from "@/admin/ui";
 import { Button } from "@/components/ui/button";
 
 type Kind = "inquiries" | "quote_requests" | "viewing_requests";
@@ -19,7 +27,11 @@ export const Route = createFileRoute("/admin/requests")({
     tab: TABS.some((t) => t.kind === s["tab"]) ? (s["tab"] as Kind) : "inquiries",
     show: s["show"] === "all" ? "all" : "new",
   }),
-  component: Requests,
+  component: () => (
+    <RequireRole area="requests">
+      <Requests />
+    </RequireRole>
+  ),
 });
 
 const NEW_ONLY = "select=id&status=eq.new";

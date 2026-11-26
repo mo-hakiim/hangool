@@ -117,8 +117,10 @@ export async function update<T>(
   id: string,
   patch: Record<string, unknown>,
   token: string,
+  /** Primary-key column (admin_roles uses user_id). */
+  key = "id",
 ) {
-  const out = (await request(`/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
+  const out = (await request(`/rest/v1/${table}?${key}=eq.${encodeURIComponent(id)}`, {
     method: "PATCH",
     token,
     headers: { "content-type": "application/json", prefer: "return=representation" },
@@ -231,13 +233,48 @@ export async function getSession(): Promise<Session | null> {
   }
 }
 
-export async function isAdmin(session: Session) {
-  const rows = await select<{ user_id: string }>(
-    "admins",
-    `select=user_id&user_id=eq.${session.user.id}`,
-    session.access_token,
-  );
-  return rows.length > 0;
+export type StaffRole = "owner" | "editor" | "requests";
+
+/** The signed-in user's staff row (role + active), or null when they aren't staff. */
+export async function getStaff(
+  session: Session,
+): Promise<{ role: StaffRole; active: boolean } | null> {
+  try {
+    const rows = await select<{ role: StaffRole; active: boolean }>(
+      "admin_roles",
+      `select=role,active&user_id=eq.${session.user.id}`,
+      session.access_token,
+    );
+    return rows[0] ?? null;
+  } catch (e) {
+    // Database not upgraded yet (supabase/schema.sql not re-run): admin_roles doesn't
+    // exist, so fall back to the old admins table, whose members were all owners.
+    if (
+      !(e instanceof SupabaseError) ||
+      (e.code !== "PGRST205" && e.code !== "42P01" && e.status !== 404)
+    )
+      throw e;
+    const old = await select<{ user_id: string }>(
+      "admins",
+      `select=user_id&user_id=eq.${session.user.id}`,
+      session.access_token,
+    );
+    return old.length ? { role: "owner", active: true } : null;
+  }
+}
+
+/** Calls a Supabase Edge Function as the signed-in user. */
+export async function callFunction<T = Record<string, unknown>>(
+  name: string,
+  body: Record<string, unknown>,
+  token: string,
+) {
+  return (await request(`/functions/v1/${name}`, {
+    method: "POST",
+    token,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  })) as T;
 }
 
 /* ---------------- Password reset & change ---------------- */
