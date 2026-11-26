@@ -40,4 +40,6 @@ use the editor.
 - Forms (contact, quote, viewing) insert into Supabase with a honeypot and minimum fill time; if saving fails they show an error plus a WhatsApp button with the message prefilled. Visitors can insert but never read requests.
 - Centralize viewport reveals and delegated button interactions in the motion shell, using Framer Motion with reduced-motion guards; this covers all content pages without duplicating observers.
 - Bundled optimized media is the fallback while no database content exists; no external image hotlinks are used.
+- SEO: each route's static head comes from `pageHead()` in `src/lib/seo.ts` (English, canonical URL, og/twitter tags with `public/og-image.jpg`); `scripts/generate-sitemap.mjs` writes `public/sitemap.xml` before every build (static pages plus published database items); `public/robots.txt` keeps `/admin` out of search engines.
+- Images: bundled photos are pre-compressed WebP (the hero has a 960px phone version via srcSet); below-the-fold images use `loading="lazy"`; admin uploads are resized to 1600px WebP in the browser before upload.
 - Run `bun run test` after content or translation changes.

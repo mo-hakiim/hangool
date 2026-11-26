@@ -1,4 +1,5 @@
 import residence from "./src/assets/residence.webp";
+import residenceSmall from "./src/assets/residence-960.webp";
 import commercial from "./src/assets/commercial.webp";
 import interior from "./src/assets/interior.webp";
 import construction from "./src/assets/construction.webp";
@@ -22,7 +23,7 @@ export const company = {
     { name: "YouTube", url: "https://www.youtube.com/@HANGOOLDevelopment" },
   ],
 };
-export const images = { residence, commercial, interior, construction };
+export const images = { residence, residenceSmall, commercial, interior, construction };
 
 // Built-in gallery photos (the former "Media & Updates" page). Shown in the Gallery
 // until the admin adds gallery items in the dashboard. Captions live in src/i18n.

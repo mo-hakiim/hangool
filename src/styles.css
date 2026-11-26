@@ -557,3 +557,4 @@ html {
 .field-error { display: block; color: var(--destructive); font-size: 12px; font-weight: 500; margin-top: 6px; }
 .field[aria-invalid="true"] { border-color: var(--destructive); }
 @media (prefers-reduced-motion: reduce) { .gallery-tile img { transition: none; } }
+@media (max-width: 1279px) { .lang-switch button { min-height: 32px; min-width: 38px; } }

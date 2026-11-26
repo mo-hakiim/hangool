@@ -14,7 +14,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { images } from "../../company-data";
+import { company, images } from "../../company-data";
 import { CTA, EmptyState, LoadingGrid, MediaCard, TextLink } from "@/components/site";
 import { pageHead, usePageMeta } from "@/lib/seo";
 import { motion, useReducedMotion } from "framer-motion";
@@ -23,8 +23,27 @@ import { useI18n, useLocalize } from "@/i18n";
 import { useProjects, useSettings } from "@/data/live";
 import { storageUrl } from "@/lib/supabase";
 
+// Structured data so search engines can show the business name, contact and profiles.
+const organization = {
+  "@context": "https://schema.org",
+  "@type": "GeneralContractor",
+  name: "Hangool Construction & Real Estate",
+  alternateName: "Hangool Development",
+  url: "https://hangooldevelopment.com/",
+  logo: "https://hangooldevelopment.com/apple-touch-icon.png",
+  image: "https://hangooldevelopment.com/og-image.jpg",
+  telephone: company.phone.replace(/\s+/g, ""),
+  email: company.email,
+  areaServed: "Somaliland",
+  address: { "@type": "PostalAddress", addressLocality: "Hargeisa", addressCountry: "SO" },
+  sameAs: company.socials.map((s) => s.url),
+};
+
 export const Route = createFileRoute("/")({
-  head: () => pageHead("home", "/"),
+  head: () => ({
+    ...pageHead("home", "/"),
+    scripts: [{ type: "application/ld+json", children: JSON.stringify(organization) }],
+  }),
   component: Index,
 });
 
@@ -47,7 +66,7 @@ function Index() {
   return (
     <>
       <section className="home-hero">
-        <HeroImage src={images.residence} alt={t.home.heroAlt} />
+        <HeroImage src={images.residence} small={images.residenceSmall} alt={t.home.heroAlt} />
         <div className="hero-scrim" />
         <div className="site-container hero-content">
           <motion.div {...reveal(0.05)} className="eyebrow text-secondary">

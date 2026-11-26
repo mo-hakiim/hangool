@@ -329,6 +329,8 @@ export function SiteFooter() {
               src={logo}
               alt="Hangool Construction & Real Estate"
               className="brand-image footer-logo"
+              loading="lazy"
+              decoding="async"
             />
             <p className="mt-5 text-sm leading-7 opacity-65 max-w-xs">{t.footer.description}</p>
           </div>
